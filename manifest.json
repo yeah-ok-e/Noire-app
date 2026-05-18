@@ -1,34 +1,26 @@
 {
-  "name": "NOIRE Command Hub",
+  "name": "NOIRE OS",
   "short_name": "NOIRE",
-  "description": "Integrated command centre for metrics and performance tracking",
+  "description": "Multi-Agent AI Operating System — life, finances, brand, health, archive",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-or-landscape",
-  "background_color": "#0a0e27",
+  "background_color": "#000000",
   "theme_color": "#000000",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000000' width='192' height='192'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='120' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000' width='192' height='192'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='120' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%233b82f6' width='512' height='512'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='320' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23000' width='512' height='512'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='320' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
-    }
-  ],
-  "categories": ["productivity", "business"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230a0e27' width='540' height='720'/><text x='270' y='360' dominant-baseline='middle' text-anchor='middle' font-size='120' fill='%233b82f6' font-family='monospace' font-weight='bold'>NOIRE</text></svg>",
-      "sizes": "540x720",
-      "form_factor": "narrow",
-      "type": "image/svg+xml"
     }
   ]
 }
