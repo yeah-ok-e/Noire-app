@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 — FREQUENCY</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#06040f;--surface:#0d0a1c;--card:#111028;
+    --purple:#7c3aed;--purple-hi:#9d5fff;--purple-dim:rgba(124,58,237,0.2);
+    --magenta:#d946ef;--mag-dim:rgba(217,70,239,0.15);
+    --text:#f0ecff;--muted:rgba(240,236,255,0.5);--dim:rgba(240,236,255,0.22);
+    --border:rgba(124,58,237,0.2);--border-hi:rgba(157,95,255,0.35);
+    --red:#f04060;--green:#10d98a;--orange:#ff6030;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;}
+  body{display:flex;flex-direction:column;font-family:'Syne',sans-serif;font-size:13px;}
+
+  /* ambient glow */
+  body::before{
+    content:'';position:fixed;
+    width:800px;height:800px;border-radius:50%;
+    background:radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+    top:-300px;right:-200px;pointer-events:none;z-index:0;
+  }
+  body::after{
+    content:'';position:fixed;
+    width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle, rgba(217,70,239,0.06) 0%, transparent 70%);
+    bottom:-150px;left:-100px;pointer-events:none;z-index:0;
+  }
+  .wrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+
+  .header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 20px;border-bottom:1px solid var(--border);
+    background:rgba(6,4,15,0.8);backdrop-filter:blur(20px);
+  }
+  .brand{font-size:20px;font-weight:800;letter-spacing:0.08em;color:var(--text);}
+  .brand span{
+    background:linear-gradient(135deg,var(--purple-hi),var(--magenta));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .header-mid{display:flex;gap:8px;}
+  .badge{
+    font-family:'Syne Mono',monospace;font-size:9px;padding:5px 11px;
+    border-radius:20px;letter-spacing:0.1em;
+  }
+  .badge-red{background:rgba(240,64,96,0.12);border:1px solid rgba(240,64,96,0.25);color:var(--red);}
+  .badge-purple{background:var(--purple-dim);border:1px solid var(--border-hi);color:var(--purple-hi);}
+  .time{font-family:'Syne Mono',monospace;font-size:11px;color:var(--dim);}
+
+  .nav{
+    display:flex;padding:0 20px;gap:4px;
+    border-bottom:1px solid var(--border);background:rgba(6,4,15,0.5);
+  }
+  .nb{
+    padding:10px 14px;font-family:'Syne',sans-serif;font-size:10px;font-weight:600;
+    letter-spacing:0.15em;background:none;border:none;border-bottom:2px solid transparent;
+    color:var(--dim);cursor:pointer;transition:all 0.2s;margin-bottom:-1px;
+  }
+  .nb.on{color:var(--text);border-bottom-color:var(--purple-hi);}
+  .nb:hover{color:var(--muted);}
+
+  .main{flex:1;overflow-y:auto;padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;}
+  .full{grid-column:1/-1;}
+
+  .panel{
+    background:rgba(17,16,40,0.6);border:1px solid var(--border);
+    border-radius:8px;padding:16px;backdrop-filter:blur(8px);
+  }
+  .panel:hover{border-color:var(--border-hi);}
+  .panel.glow-purple::before{
+    content:'';position:absolute;inset:0;border-radius:8px;
+    box-shadow:inset 0 0 20px rgba(124,58,237,0.05);pointer-events:none;
+  }
+
+  .panel-label{
+    font-family:'Syne Mono',monospace;font-size:8px;letter-spacing:0.3em;
+    color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel-label em{color:var(--purple-hi);font-style:normal;}
+
+  .freq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .fq{
+    padding:14px 10px;border-radius:6px;
+    background:rgba(124,58,237,0.06);border:1px solid var(--border);
+    text-align:center;
+  }
+  .fq-label{font-family:'Syne Mono',monospace;font-size:8px;letter-spacing:0.15em;color:var(--dim);margin-bottom:8px;}
+  .fq-val{font-size:26px;font-weight:800;line-height:1;color:var(--text);}
+  .fq-val.red{color:var(--red);}
+  .fq-val.green{color:var(--green);}
+  .fq-sub{font-size:9px;color:var(--dim);margin-top:4px;}
+
+  /* wave viz */
+  .wave-bar{display:flex;gap:2px;align-items:flex-end;height:32px;margin-top:10px;}
+  .wb{flex:1;border-radius:1px 1px 0 0;background:var(--purple-dim);min-height:2px;}
+
+  .score-big{font-size:60px;font-weight:800;
+    background:linear-gradient(135deg,var(--purple-hi),var(--magenta));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    line-height:1;
+  }
+  .score-delta{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:12px;font-weight:600;color:var(--green);
+    background:rgba(16,217,138,0.1);border-radius:20px;padding:4px 10px;
+    margin-top:6px;
+  }
+
+  .segments{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+  .seg-row{display:flex;align-items:center;gap:8px;}
+  .seg-lbl{font-size:9px;color:var(--dim);width:60px;font-family:'Syne Mono',monospace;}
+  .seg-track{flex:1;height:6px;background:rgba(124,58,237,0.1);border-radius:3px;overflow:hidden;}
+  .seg-fill{height:100%;border-radius:3px;}
+  .seg-num{font-size:9px;font-family:'Syne Mono',monospace;color:var(--dim);width:24px;text-align:right;}
+
+  .guard-box{
+    background:rgba(240,64,96,0.04);border:1px solid rgba(240,64,96,0.2);
+    border-radius:8px;padding:14px;
+  }
+  .guard-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .guard-icon{font-size:16px;}
+  .guard-title{font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--muted);}
+  .guard-n{
+    margin-left:auto;background:rgba(240,64,96,0.15);color:var(--red);
+    font-family:'Syne Mono',monospace;font-size:9px;
+    padding:3px 8px;border-radius:10px;
+  }
+  .guard-entries{display:flex;flex-direction:column;gap:6px;}
+  .ge{
+    font-size:11px;color:rgba(255,200,100,0.7);
+    padding:8px 10px;background:rgba(240,64,96,0.04);
+    border-radius:4px;border-left:2px solid rgba(240,64,96,0.35);line-height:1.5;
+  }
+
+  .queue{display:flex;flex-direction:column;gap:5px;}
+  .qi{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border-radius:6px;
+    background:rgba(124,58,237,0.06);border:1px solid var(--border);
+    transition:all 0.15s;
+  }
+  .qi:hover{background:rgba(124,58,237,0.1);border-color:var(--border-hi);}
+  .qi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .qi-dot.red{background:var(--red);box-shadow:0 0 6px rgba(240,64,96,0.5);}
+  .qi-dot.orange{background:var(--orange);}
+  .qi-dot.purple{background:var(--purple-hi);}
+  .qi-src{
+    font-family:'Syne Mono',monospace;font-size:8px;color:var(--purple-hi);
+    width:50px;flex-shrink:0;letter-spacing:0.05em;
+  }
+  .qi-text{font-size:11px;color:var(--muted);flex:1;}
+
+  .agents-freq{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
+  .af{
+    padding:10px 4px;text-align:center;
+    background:rgba(124,58,237,0.05);border:1px solid var(--border);border-radius:6px;
+    cursor:pointer;transition:all 0.2s;
+  }
+  .af:hover{background:rgba(124,58,237,0.1);border-color:var(--border-hi);}
+  .af-i{font-size:15px;display:block;margin-bottom:4px;}
+  .af-n{font-family:'Syne Mono',monospace;font-size:7px;letter-spacing:0.08em;color:var(--dim);display:block;margin-bottom:3px;}
+  .af-s{font-family:'Syne Mono',monospace;font-size:8px;font-weight:600;}
+
+  .cmd{
+    padding:10px 20px;border-top:1px solid var(--border);
+    display:flex;align-items:center;gap:10px;
+    background:rgba(6,4,15,0.8);backdrop-filter:blur(20px);
+  }
+  .cp{
+    color:var(--purple-hi);font-family:'Syne Mono',monospace;font-size:14px;
+    text-shadow:0 0 8px rgba(157,95,255,0.5);
+  }
+  .ci{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-family:'Syne Mono',monospace;font-size:12px;
+  }
+  .ci::placeholder{color:var(--dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="brand">LEGACY<span> OS</span></div>
+  <div class="header-mid">
+    <div class="badge badge-red">SURVIVAL</div>
+    <div class="badge badge-purple">MOM 68 ▲</div>
+    <div class="badge badge-red">RUNWAY 14D</div>
+  </div>
+  <div class="time">03:55 — 05.18.26</div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="panel full">
+    <div class="panel-label">CASH SNAPSHOT <em>LIVE</em></div>
+    <div class="freq-grid">
+      <div class="fq">
+        <div class="fq-label">CASH</div>
+        <div class="fq-val">$847</div>
+        <div class="fq-sub">on hand</div>
+      </div>
+      <div class="fq">
+        <div class="fq-label">RUNWAY</div>
+        <div class="fq-val red">14d</div>
+        <div class="fq-sub" style="color:var(--red)">critical</div>
+      </div>
+      <div class="fq">
+        <div class="fq-label">BURN</div>
+        <div class="fq-val">$62</div>
+        <div class="fq-sub">per day</div>
+      </div>
+      <div class="fq">
+        <div class="fq-label">RISK</div>
+        <div class="fq-val red" style="font-size:16px;padding-top:4px;">CRIT</div>
+        <div class="fq-sub" style="color:var(--red)">no streams</div>
+      </div>
+    </div>
+    <div class="wave-bar">
+      <div class="wb" style="height:8px;background:rgba(240,64,96,0.4)"></div>
+      <div class="wb" style="height:12px;background:rgba(240,64,96,0.4)"></div>
+      <div class="wb" style="height:6px;background:rgba(240,96,48,0.4)"></div>
+      <div class="wb" style="height:20px;background:rgba(124,58,237,0.4)"></div>
+      <div class="wb" style="height:16px;background:rgba(124,58,237,0.4)"></div>
+      <div class="wb" style="height:28px;background:rgba(124,58,237,0.5)"></div>
+      <div class="wb" style="height:22px;background:rgba(124,58,237,0.4)"></div>
+      <div class="wb" style="height:18px;background:rgba(124,58,237,0.35)"></div>
+      <div class="wb" style="height:32px;background:rgba(157,95,255,0.5)"></div>
+      <div class="wb" style="height:26px;background:rgba(157,95,255,0.45)"></div>
+      <div class="wb" style="height:20px;background:rgba(157,95,255,0.4)"></div>
+      <div class="wb" style="height:14px;background:rgba(124,58,237,0.3)"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">MOMENTUM</div>
+    <div class="score-big">68</div>
+    <div class="score-delta">▲ +12 pts this week</div>
+    <div class="segments">
+      <div class="seg-row">
+        <div class="seg-lbl">HEALTH</div>
+        <div class="seg-track"><div class="seg-fill" style="width:80%;background:linear-gradient(90deg,var(--purple),var(--green))"></div></div>
+        <div class="seg-num">80</div>
+      </div>
+      <div class="seg-row">
+        <div class="seg-lbl">NOIRE</div>
+        <div class="seg-track"><div class="seg-fill" style="width:55%;background:linear-gradient(90deg,var(--purple),var(--orange))"></div></div>
+        <div class="seg-num">55</div>
+      </div>
+      <div class="seg-row">
+        <div class="seg-lbl">FINANCE</div>
+        <div class="seg-track"><div class="seg-fill" style="width:40%;background:var(--red)"></div></div>
+        <div class="seg-num" style="color:var(--red)">40</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guard-box">
+    <div class="guard-hdr">
+      <span class="guard-icon">⚡</span>
+      <span class="guard-title">REALITY GUARD</span>
+      <span class="guard-n">2 FLAGS</span>
+    </div>
+    <div class="guard-entries">
+      <div class="ge">Runway at 14 days — 30 day minimum. Cash emergency.</div>
+      <div class="ge">SURVIVAL phase with zero income streams. Contradiction.</div>
+    </div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-label">ACTIONS QUEUE <em>AUTO</em></div>
+    <div class="queue">
+      <div class="qi"><div class="qi-dot red"></div><div class="qi-src">CFO</div><div class="qi-text">Activate income stream — runway critical at 14 days</div></div>
+      <div class="qi"><div class="qi-dot red"></div><div class="qi-src">NOIRE</div><div class="qi-text">Send 10 DMs today — 0 of 50 weekly touches completed</div></div>
+      <div class="qi"><div class="qi-dot orange"></div><div class="qi-src">OPS</div><div class="qi-text">Log non-negs before midnight</div></div>
+      <div class="qi"><div class="qi-dot purple"></div><div class="qi-src">HEALTH</div><div class="qi-text">Protein 0g / 150g — log intake now</div></div>
+    </div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-label">AGENT BOARD <em>8 LIVE</em></div>
+    <div class="agents-freq">
+      <div class="af"><span class="af-i" style="color:#20c8a8">◈</span><span class="af-n">CFO</span><span class="af-s" style="color:var(--red)">CRIT</span></div>
+      <div class="af"><span class="af-i">◎</span><span class="af-n">OPS</span><span class="af-s" style="color:var(--dim)">IDLE</span></div>
+      <div class="af"><span class="af-i" style="color:#ff6030">◆</span><span class="af-n">NOIRE</span><span class="af-s" style="color:var(--orange)">LOW</span></div>
+      <div class="af"><span class="af-i" style="color:#f59e0b">⚡</span><span class="af-n">GUARD</span><span class="af-s" style="color:#f59e0b">2</span></div>
+      <div class="af"><span class="af-i" style="color:#10d98a">◉</span><span class="af-n">HEALTH</span><span class="af-s" style="color:var(--green)">OK</span></div>
+      <div class="af"><span class="af-i" style="color:#7c9fff">◐</span><span class="af-n">INTEL</span><span class="af-s" style="color:#7c9fff">ON</span></div>
+      <div class="af"><span class="af-i" style="color:#9b6bff">◇</span><span class="af-n">ARCH</span><span class="af-s" style="color:var(--purple-hi)">STBY</span></div>
+      <div class="af"><span class="af-i" style="color:#d946ef">∞</span><span class="af-n">LEGACY</span><span class="af-s" style="color:var(--magenta)">ON</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="cp">›</span>
+  <input class="ci" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</div>
+</body>
+</html>

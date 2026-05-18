@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 — FIELD OPS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0b0d0b;--surface:#111410;--card:#151810;
+    --olive:#6b7c4a;--olive-hi:#8fa05e;--olive-dim:rgba(107,124,74,0.25);
+    --text:#d8dcc8;--muted:rgba(216,220,200,0.5);--dim:rgba(216,220,200,0.25);
+    --border:rgba(107,124,74,0.2);--border-hi:rgba(107,124,74,0.4);
+    --red:#cc3322;--amber:#c8a040;--white:#e8ecdc;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;}
+  body{display:flex;flex-direction:column;}
+
+  .header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 18px;border-bottom:2px solid var(--olive);
+    background:var(--surface);
+  }
+  .brand-block{}
+  .brand{font-size:16px;font-weight:700;letter-spacing:0.2em;color:var(--white);}
+  .brand-tagline{font-size:8px;letter-spacing:0.15em;color:var(--olive-hi);margin-top:2px;}
+  .grid-ref{font-size:9px;color:var(--dim);letter-spacing:0.1em;}
+  .phase-block{
+    border:1px solid var(--red);padding:5px 12px;text-align:center;
+    background:rgba(204,51,34,0.06);
+  }
+  .phase-label{font-size:8px;letter-spacing:0.2em;color:var(--dim);}
+  .phase-val{font-size:11px;font-weight:700;letter-spacing:0.2em;color:var(--red);margin-top:2px;}
+
+  .nav{
+    display:flex;border-bottom:1px solid var(--border);background:var(--surface);
+  }
+  .nav-btn{
+    flex:1;padding:7px;text-align:center;
+    font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;
+    background:none;border:none;border-right:1px solid var(--border);
+    color:var(--dim);cursor:pointer;transition:all 0.15s;
+  }
+  .nav-btn:last-child{border-right:none;}
+  .nav-btn.active{color:var(--olive-hi);background:rgba(107,124,74,0.08);}
+
+  .main{flex:1;overflow-y:auto;padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;}
+  .full{grid-column:1/-1;}
+
+  .panel{
+    border:1px solid var(--border);background:var(--card);padding:12px;
+    position:relative;
+  }
+  .panel::before{
+    content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 18px,
+      rgba(107,124,74,0.03) 18px,
+      rgba(107,124,74,0.03) 19px
+    );
+    pointer-events:none;
+  }
+  .panel-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);
+    position:relative;
+  }
+  .panel-title{font-size:8px;letter-spacing:0.3em;color:var(--olive-hi);font-weight:600;}
+  .panel-meta{font-size:8px;color:var(--dim);}
+
+  .data-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:relative;}
+  .data-block{padding:8px;border:1px solid var(--border);background:rgba(0,0,0,0.3);}
+  .db-label{font-size:7px;letter-spacing:0.2em;color:var(--dim);margin-bottom:5px;}
+  .db-val{font-size:22px;font-weight:700;line-height:1;color:var(--white);}
+  .db-val.red{color:var(--red);}
+  .db-val.olive{color:var(--olive-hi);}
+  .db-sub{font-size:8px;color:var(--dim);margin-top:3px;}
+
+  .status-bar{display:flex;gap:3px;margin-top:8px;position:relative;}
+  .status-seg{
+    flex:1;height:3px;
+    background:rgba(107,124,74,0.15);
+  }
+  .status-seg.on{background:var(--olive);}
+  .status-seg.warn{background:var(--amber);}
+  .status-seg.crit{background:var(--red);}
+
+  .action-table{width:100%;border-collapse:collapse;position:relative;}
+  .action-table tr{border-bottom:1px solid rgba(107,124,74,0.1);}
+  .action-table tr:last-child{border-bottom:none;}
+  .action-table td{padding:7px 4px;vertical-align:top;}
+  .td-priority{width:16px;font-size:10px;font-weight:700;}
+  .p-crit{color:var(--red);}
+  .p-high{color:var(--amber);}
+  .p-med{color:var(--olive);}
+  .td-agent{width:60px;font-size:8px;letter-spacing:0.1em;color:var(--olive-hi);padding-right:8px;}
+  .td-action{font-size:10px;color:var(--muted);line-height:1.4;}
+
+  .agent-rows{display:flex;flex-direction:column;gap:4px;position:relative;}
+  .agent-row{
+    display:flex;align-items:center;gap:8px;padding:6px 8px;
+    border:1px solid var(--border);background:rgba(0,0,0,0.2);
+  }
+  .ar-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;}
+  .ar-name{font-size:8px;letter-spacing:0.15em;color:var(--muted);width:80px;flex-shrink:0;}
+  .ar-bar{flex:1;height:3px;background:rgba(107,124,74,0.12);}
+  .ar-bar-fill{height:100%;}
+  .ar-status{font-size:9px;font-weight:600;width:60px;text-align:right;flex-shrink:0;}
+  .s-ok{color:var(--olive-hi);}
+  .s-warn{color:var(--amber);}
+  .s-crit{color:var(--red);}
+  .s-idle{color:var(--dim);}
+
+  .guard-panel{
+    border:1px solid rgba(204,51,34,0.25);background:rgba(204,51,34,0.03);padding:12px;
+  }
+  .guard-header{font-size:8px;letter-spacing:0.25em;color:rgba(204,51,34,0.7);margin-bottom:8px;font-weight:700;position:relative;}
+  .guard-entry{
+    display:flex;gap:8px;padding:6px 0;
+    border-bottom:1px solid rgba(204,51,34,0.08);
+    font-size:10px;color:rgba(200,160,64,0.8);
+    line-height:1.4;position:relative;
+  }
+  .guard-entry:last-child{border-bottom:none;}
+  .ge-bullet{color:var(--red);font-size:8px;margin-top:2px;flex-shrink:0;}
+
+  .cmd{
+    padding:8px 16px;border-top:2px solid var(--olive);
+    display:flex;align-items:center;gap:8px;background:var(--surface);
+  }
+  .cmd-prompt{color:var(--olive-hi);font-size:14px;}
+  .cmd-input{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;
+  }
+  .cmd-input::placeholder{color:var(--dim);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand-block">
+    <div class="brand">LEGACY OS</div>
+    <div class="brand-tagline">FIELD OPERATIONS // MULTI-AGENT RUNTIME</div>
+  </div>
+  <div class="grid-ref">REF: 05.18.26-0355 // SECTOR: HOME</div>
+  <div class="phase-block">
+    <div class="phase-label">OPERATIONAL PHASE</div>
+    <div class="phase-val">▶ SURVIVAL</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active">HOME</button>
+  <button class="nav-btn">FINANCE</button>
+  <button class="nav-btn">NOIRE</button>
+  <button class="nav-btn">BODY</button>
+  <button class="nav-btn">AGENTS</button>
+  <button class="nav-btn">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="panel full">
+    <div class="panel-header">
+      <div class="panel-title">FINANCIAL STATUS REPORT</div>
+      <div class="panel-meta">LIVE // 05.18.26</div>
+    </div>
+    <div class="data-grid">
+      <div class="data-block">
+        <div class="db-label">CASH ON HAND</div>
+        <div class="db-val">$847</div>
+        <div class="db-sub">current balance</div>
+      </div>
+      <div class="data-block">
+        <div class="db-label">RUNWAY</div>
+        <div class="db-val red">14d</div>
+        <div class="db-sub" style="color:var(--red)">CRITICAL</div>
+      </div>
+      <div class="data-block">
+        <div class="db-label">DAILY BURN</div>
+        <div class="db-val">$62</div>
+        <div class="db-sub">per day avg</div>
+      </div>
+      <div class="data-block">
+        <div class="db-label">INCOME STREAMS</div>
+        <div class="db-val red">0</div>
+        <div class="db-sub" style="color:var(--red)">none active</div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-seg crit"></div>
+      <div class="status-seg crit"></div>
+      <div class="status-seg warn"></div>
+      <div class="status-seg warn"></div>
+      <div class="status-seg warn"></div>
+      <div class="status-seg on"></div>
+      <div class="status-seg on"></div>
+      <div class="status-seg on"></div>
+      <div class="status-seg on"></div>
+      <div class="status-seg"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">NEXT ACTIONS — PRIORITY QUEUE</div>
+      <div class="panel-meta">4 ITEMS</div>
+    </div>
+    <table class="action-table">
+      <tr>
+        <td class="td-priority p-crit">!</td>
+        <td class="td-agent">CFO</td>
+        <td class="td-action">Activate income stream — runway critical</td>
+      </tr>
+      <tr>
+        <td class="td-priority p-crit">!</td>
+        <td class="td-agent">NOIRE</td>
+        <td class="td-action">Send 10 DMs — 0/50 weekly</td>
+      </tr>
+      <tr>
+        <td class="td-priority p-high">▸</td>
+        <td class="td-agent">OPS</td>
+        <td class="td-action">Log daily non-negs before midnight</td>
+      </tr>
+      <tr>
+        <td class="td-priority p-med">·</td>
+        <td class="td-agent">HEALTH</td>
+        <td class="td-action">Log protein — 0g / 150g today</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="guard-panel">
+    <div class="guard-header">[!] REALITY GUARD — 2 ACTIVE CONTRADICTIONS</div>
+    <div class="guard-entry"><span class="ge-bullet">▸</span>Runway at 14 days — floor is 30 days. Cash emergency. No delay.</div>
+    <div class="guard-entry"><span class="ge-bullet">▸</span>SURVIVAL phase with 0 income streams. Direct contradiction detected.</div>
+  </div>
+
+  <div class="panel full">
+    <div class="panel-header">
+      <div class="panel-title">AGENT STATUS BOARD</div>
+      <div class="panel-meta">8 AGENTS // TICK 0355</div>
+    </div>
+    <div class="agent-rows">
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#00d4aa">◈</div>
+        <div class="ar-name">CFO</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:15%;background:#cc3322"></div></div>
+        <div class="ar-status s-crit">CRITICAL</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon">◎</div>
+        <div class="ar-name">OPERATOR</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:50%;background:var(--olive)"></div></div>
+        <div class="ar-status s-idle">IDLE</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#ff6b35">◆</div>
+        <div class="ar-name">NOIRE</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:20%;background:#c8a040"></div></div>
+        <div class="ar-status s-warn">LOW VOLUME</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#f59e0b">⚡</div>
+        <div class="ar-name">REALITY GUARD</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:100%;background:#c8a040"></div></div>
+        <div class="ar-status s-warn">2 FLAGS</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#00ff88">◉</div>
+        <div class="ar-name">HEALTH</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:80%;background:var(--olive)"></div></div>
+        <div class="ar-status s-ok">CLEAR</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#60a5fa">◐</div>
+        <div class="ar-name">INTELLIGENCE</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:60%;background:#60a5fa"></div></div>
+        <div class="ar-status" style="color:#60a5fa">WATCHING</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#9b6bff">◇</div>
+        <div class="ar-name">ARCHIVIST</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:70%;background:#9b6bff"></div></div>
+        <div class="ar-status" style="color:#9b6bff">STANDBY</div>
+      </div>
+      <div class="agent-row">
+        <div class="ar-icon" style="color:#e879f9">∞</div>
+        <div class="ar-name">LEGACY</div>
+        <div class="ar-bar"><div class="ar-bar-fill" style="width:90%;background:#e879f9"></div></div>
+        <div class="ar-status" style="color:#e879f9">ACTIVE</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="cmd-prompt">›</span>
+  <input class="cmd-input" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>

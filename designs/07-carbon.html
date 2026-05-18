@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 — CARBON</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#111213;--surface:#161719;--card:#1c1d1f;--elevated:#222426;
+    --text:#e4e6ea;--muted:rgba(228,230,234,0.5);--dim:rgba(228,230,234,0.25);
+    --border:rgba(255,255,255,0.07);--border-hi:rgba(255,255,255,0.14);
+    --blue:#4d9fff;--green:#30c97c;--red:#f04040;--orange:#ff7730;--amber:#e8a030;
+    --purple:#9b6bff;--magenta:#e060d8;--teal:#20c8a8;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;}
+  body{display:flex;flex-direction:column;font-family:'Inter',sans-serif;font-size:13px;}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    height:44px;padding:0 18px;
+    background:var(--surface);border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-logo{
+    width:28px;height:28px;background:var(--card);border:1px solid var(--border-hi);
+    border-radius:4px;display:flex;align-items:center;justify-content:center;
+    font-family:'Roboto Mono',monospace;font-size:13px;font-weight:500;color:var(--text);
+  }
+  .brand-name{font-size:14px;font-weight:600;letter-spacing:0.05em;}
+  .brand-slash{color:var(--border-hi);margin:0 4px;}
+  .brand-module{font-size:13px;font-weight:400;color:var(--muted);}
+  .topbar-center{display:flex;gap:6px;}
+  .chip{
+    height:22px;padding:0 8px;border-radius:3px;
+    font-size:10px;font-weight:500;letter-spacing:0.05em;
+    display:flex;align-items:center;gap:4px;
+  }
+  .chip-red{background:rgba(240,64,64,0.12);color:var(--red);border:1px solid rgba(240,64,64,0.2);}
+  .chip-blue{background:rgba(77,159,255,0.1);color:var(--blue);border:1px solid rgba(77,159,255,0.18);}
+  .chip-green{background:rgba(48,201,124,0.1);color:var(--green);border:1px solid rgba(48,201,124,0.18);}
+  .chip-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+  .topbar-right{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--dim);}
+
+  .sidebar-nav{
+    display:flex;border-bottom:1px solid var(--border);
+    background:var(--surface);padding:0 18px;gap:0;
+  }
+  .sn-btn{
+    padding:9px 14px;font-size:11px;font-weight:500;letter-spacing:0.03em;
+    background:none;border:none;border-bottom:2px solid transparent;
+    color:var(--muted);cursor:pointer;transition:all 0.15s;
+    margin-bottom:-1px;
+  }
+  .sn-btn.active{color:var(--text);border-bottom-color:var(--blue);}
+  .sn-btn:hover{color:var(--text);}
+
+  .main{flex:1;overflow-y:auto;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;}
+  .full{grid-column:1/-1;}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;
+  }
+  .card:hover{border-color:var(--border-hi);}
+
+  .card-header{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+  }
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--muted);}
+  .card-badge{
+    font-family:'Roboto Mono',monospace;font-size:9px;padding:2px 7px;
+    border-radius:2px;background:var(--elevated);color:var(--muted);
+    border:1px solid var(--border);
+  }
+  .card-badge.live{color:var(--green);border-color:rgba(48,201,124,0.2);background:rgba(48,201,124,0.08);}
+
+  .metrics-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .metric-box{
+    padding:12px;background:var(--elevated);border-radius:4px;
+    border:1px solid var(--border);
+  }
+  .mb-label{font-size:9px;font-weight:500;color:var(--dim);margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;}
+  .mb-val{font-size:24px;font-weight:700;line-height:1;color:var(--text);}
+  .mb-val.red{color:var(--red);}
+  .mb-val.green{color:var(--green);}
+  .mb-sub{font-size:9px;color:var(--dim);margin-top:3px;}
+  .mb-bar{height:2px;background:var(--border);border-radius:1px;margin-top:6px;}
+  .mb-bar-fill{height:100%;border-radius:1px;}
+
+  .momentum-row{display:flex;align-items:center;gap:16px;}
+  .mom-big{font-size:48px;font-weight:700;color:var(--blue);line-height:1;}
+  .mom-right{}
+  .mom-delta{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:12px;font-weight:600;color:var(--green);
+    background:rgba(48,201,124,0.1);border-radius:3px;padding:2px 6px;
+  }
+  .mom-period{font-size:10px;color:var(--dim);margin-top:4px;font-family:'Roboto Mono',monospace;}
+  .domain-bars{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+  .dom-row{display:flex;align-items:center;gap:8px;}
+  .dom-label{font-size:9px;color:var(--dim);width:60px;}
+  .dom-track{flex:1;height:4px;background:var(--border);border-radius:2px;}
+  .dom-fill{height:100%;border-radius:2px;}
+  .dom-val{font-size:9px;font-family:'Roboto Mono',monospace;color:var(--dim);width:28px;text-align:right;}
+
+  .action-list{display:flex;flex-direction:column;gap:4px;}
+  .action-item{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;
+    background:var(--elevated);border-radius:4px;border:1px solid var(--border);
+    border-left:3px solid transparent;cursor:default;
+    transition:border-color 0.15s;
+  }
+  .action-item.crit{border-left-color:var(--red);}
+  .action-item.high{border-left-color:var(--orange);}
+  .action-item.med{border-left-color:var(--amber);}
+  .action-item:hover{border-color:var(--border-hi);border-left-color:inherit;}
+  .ai-source{
+    font-family:'Roboto Mono',monospace;font-size:8px;font-weight:500;
+    padding:2px 6px;border-radius:2px;flex-shrink:0;
+  }
+  .src-cfo{background:rgba(32,200,168,0.12);color:var(--teal);}
+  .src-noire{background:rgba(255,119,48,0.12);color:var(--orange);}
+  .src-ops{background:rgba(255,255,255,0.07);color:var(--muted);}
+  .src-health{background:rgba(48,201,124,0.1);color:var(--green);}
+  .ai-text{font-size:11px;color:var(--muted);flex:1;}
+  .ai-priority{font-family:'Roboto Mono',monospace;font-size:9px;color:var(--dim);}
+
+  .guard{
+    background:rgba(240,64,64,0.04);border:1px solid rgba(240,64,64,0.15);
+    border-radius:6px;padding:14px;
+  }
+  .guard-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .guard-icon{color:var(--amber);font-size:14px;}
+  .guard-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.04em;}
+  .guard-count{
+    margin-left:auto;font-family:'Roboto Mono',monospace;font-size:9px;
+    padding:2px 7px;background:rgba(240,64,64,0.12);color:var(--red);
+    border-radius:10px;border:1px solid rgba(240,64,64,0.2);
+  }
+  .guard-list{display:flex;flex-direction:column;gap:6px;}
+  .guard-item{
+    font-size:11px;color:rgba(230,200,100,0.7);
+    padding:7px 10px;background:rgba(240,64,64,0.04);
+    border-radius:3px;border-left:2px solid rgba(240,64,64,0.3);line-height:1.4;
+  }
+
+  .agents-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
+  .agent{
+    background:var(--elevated);border:1px solid var(--border);border-radius:5px;
+    padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.15s;
+  }
+  .agent:hover{border-color:var(--border-hi);background:rgba(255,255,255,0.04);}
+  .ag-icon{font-size:16px;display:block;margin-bottom:4px;}
+  .ag-name{font-size:8px;font-weight:500;color:var(--dim);letter-spacing:0.05em;margin-bottom:3px;text-transform:uppercase;}
+  .ag-status{font-family:'Roboto Mono',monospace;font-size:8px;font-weight:600;}
+
+  .cmd{
+    padding:8px 18px;border-top:1px solid var(--border);
+    display:flex;align-items:center;gap:10px;background:var(--surface);
+  }
+  .cmd-p{color:var(--blue);font-family:'Roboto Mono',monospace;font-size:14px;}
+  .cmd-i{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-family:'Roboto Mono',monospace;font-size:12px;
+  }
+  .cmd-i::placeholder{color:var(--dim);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo">L</div>
+    <span class="brand-name">LEGACY OS</span>
+    <span class="brand-slash">/</span>
+    <span class="brand-module">HOME</span>
+  </div>
+  <div class="topbar-center">
+    <div class="chip chip-red"><div class="chip-dot"></div>SURVIVAL</div>
+    <div class="chip chip-blue">MOM 68 ▲</div>
+    <div class="chip chip-red">RUNWAY 14D</div>
+  </div>
+  <div class="topbar-right">03:55 — MON 05.18.26</div>
+</div>
+
+<div class="sidebar-nav">
+  <button class="sn-btn active">Home</button>
+  <button class="sn-btn">Finance</button>
+  <button class="sn-btn">Noire</button>
+  <button class="sn-btn">Body</button>
+  <button class="sn-btn">Agents</button>
+  <button class="sn-btn">Legacy</button>
+</div>
+
+<div class="main">
+
+  <div class="card full">
+    <div class="card-header">
+      <div class="card-title">CASH SNAPSHOT</div>
+      <div class="card-badge live">LIVE</div>
+    </div>
+    <div class="metrics-4">
+      <div class="metric-box">
+        <div class="mb-label">Cash on Hand</div>
+        <div class="mb-val">$847</div>
+        <div class="mb-sub">current balance</div>
+        <div class="mb-bar"><div class="mb-bar-fill" style="width:40%;background:var(--blue)"></div></div>
+      </div>
+      <div class="metric-box">
+        <div class="mb-label">Runway</div>
+        <div class="mb-val red">14d</div>
+        <div class="mb-sub" style="color:var(--red)">critical — below 30d</div>
+        <div class="mb-bar"><div class="mb-bar-fill" style="width:14%;background:var(--red)"></div></div>
+      </div>
+      <div class="metric-box">
+        <div class="mb-label">Daily Burn</div>
+        <div class="mb-val">$62</div>
+        <div class="mb-sub">per day avg</div>
+        <div class="mb-bar"><div class="mb-bar-fill" style="width:50%;background:var(--orange)"></div></div>
+      </div>
+      <div class="metric-box">
+        <div class="mb-label">Risk Level</div>
+        <div class="mb-val red" style="font-size:16px;padding-top:4px;">CRITICAL</div>
+        <div class="mb-sub">no income streams</div>
+        <div class="mb-bar"><div class="mb-bar-fill" style="width:100%;background:var(--red)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">MOMENTUM</div><div class="card-badge">5-DAY ROLL</div></div>
+    <div class="momentum-row">
+      <div class="mom-big">68</div>
+      <div class="mom-right">
+        <div class="mom-delta">▲ +12 pts</div>
+        <div class="mom-period">rising trend</div>
+      </div>
+    </div>
+    <div class="domain-bars">
+      <div class="dom-row">
+        <div class="dom-label">Health</div>
+        <div class="dom-track"><div class="dom-fill" style="width:80%;background:var(--green)"></div></div>
+        <div class="dom-val">80</div>
+      </div>
+      <div class="dom-row">
+        <div class="dom-label">Noire</div>
+        <div class="dom-track"><div class="dom-fill" style="width:55%;background:var(--orange)"></div></div>
+        <div class="dom-val">55</div>
+      </div>
+      <div class="dom-row">
+        <div class="dom-label">Finance</div>
+        <div class="dom-track"><div class="dom-fill" style="width:40%;background:var(--red)"></div></div>
+        <div class="dom-val" style="color:var(--red)">40</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guard">
+    <div class="guard-header">
+      <span class="guard-icon">⚡</span>
+      <span class="guard-title">REALITY GUARD</span>
+      <span class="guard-count">2 FLAGS</span>
+    </div>
+    <div class="guard-list">
+      <div class="guard-item">Runway at 14 days — below 30 day minimum. Cash emergency requiring immediate action.</div>
+      <div class="guard-item">SURVIVAL phase active with zero income streams. Direct contradiction detected.</div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <div class="card-header"><div class="card-title">NEXT ACTIONS</div><div class="card-badge">AUTO-GENERATED</div></div>
+    <div class="action-list">
+      <div class="action-item crit"><div class="ai-source src-cfo">CFO</div><div class="ai-text">Activate income stream — runway critical at 14 days</div><div class="ai-priority">P1</div></div>
+      <div class="action-item crit"><div class="ai-source src-noire">NOIRE</div><div class="ai-text">Send 10 DMs today — 0 of 50 weekly touches completed</div><div class="ai-priority">P1</div></div>
+      <div class="action-item high"><div class="ai-source src-ops">OPS</div><div class="ai-text">Mark daily non-negs — not logged yet today</div><div class="ai-priority">P2</div></div>
+      <div class="action-item med"><div class="ai-source src-health">HEALTH</div><div class="ai-text">Log protein — 0g tracked against 150g daily goal</div><div class="ai-priority">P3</div></div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <div class="card-header"><div class="card-title">AGENT BOARD</div><div class="card-badge live">8 ACTIVE</div></div>
+    <div class="agents-grid">
+      <div class="agent"><span class="ag-icon" style="color:#20c8a8">◈</span><div class="ag-name">CFO</div><div class="ag-status" style="color:var(--red)">CRITICAL</div></div>
+      <div class="agent"><span class="ag-icon">◎</span><div class="ag-name">OPS</div><div class="ag-status" style="color:var(--dim)">IDLE</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#ff7730">◆</span><div class="ag-name">NOIRE</div><div class="ag-status" style="color:var(--orange)">LOW VOL</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#e8a030">⚡</span><div class="ag-name">GUARD</div><div class="ag-status" style="color:var(--amber)">2 FLAGS</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#30c97c">◉</span><div class="ag-name">HEALTH</div><div class="ag-status" style="color:var(--green)">CLEAR</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#4d9fff">◐</span><div class="ag-name">INTEL</div><div class="ag-status" style="color:var(--blue)">WATCHING</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#9b6bff">◇</span><div class="ag-name">ARCH</div><div class="ag-status" style="color:var(--purple)">STANDBY</div></div>
+      <div class="agent"><span class="ag-icon" style="color:#e060d8">∞</span><div class="ag-name">LEGACY</div><div class="ag-status" style="color:var(--magenta)">ACTIVE</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="cmd-p">›</span>
+  <input class="cmd-i" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>

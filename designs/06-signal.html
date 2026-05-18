@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 — SIGNAL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#000;--text:#ffffff;
+    --acc:#ff5500;--acc-dim:rgba(255,85,0,0.15);--acc-border:rgba(255,85,0,0.3);
+    --muted:rgba(255,255,255,0.4);--dim:rgba(255,255,255,0.15);
+    --border:rgba(255,255,255,0.08);
+    --red:#ff2020;--green:#00e87a;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;overflow:hidden;}
+  body{display:flex;flex-direction:column;}
+
+  .header{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;
+    padding:12px 20px;border-bottom:1px solid var(--border);
+  }
+  .brand{font-size:13px;letter-spacing:0.35em;font-weight:500;color:var(--text);}
+  .status-row{display:flex;gap:16px;justify-content:center;}
+  .status-chip{
+    font-size:9px;letter-spacing:0.15em;padding:4px 10px;
+    border:1px solid var(--border);color:var(--muted);
+  }
+  .status-chip.hot{border-color:var(--acc-border);color:var(--acc);background:var(--acc-dim);}
+  .status-chip.red{border-color:rgba(255,32,32,0.3);color:var(--red);background:rgba(255,32,32,0.08);}
+  .time{font-size:11px;color:var(--dim);text-align:right;}
+
+  .nav{
+    display:flex;border-bottom:1px solid var(--border);
+    overflow:hidden;
+  }
+  .nb{
+    flex:1;padding:8px;text-align:center;
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.25em;
+    background:none;border:none;border-right:1px solid var(--border);
+    color:var(--dim);cursor:pointer;transition:all 0.2s;
+  }
+  .nb:last-child{border-right:none;}
+  .nb.on{color:var(--acc);position:relative;}
+  .nb.on::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+    background:var(--acc);
+  }
+
+  .main{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+
+  /* ultra-minimal stat row */
+  .stat-strip{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--border);border:1px solid var(--border);
+  }
+  .stat-cell{
+    padding:14px 16px;background:var(--bg);
+  }
+  .sc-label{font-size:8px;letter-spacing:0.2em;color:var(--dim);margin-bottom:8px;}
+  .sc-val{font-size:28px;font-weight:300;color:var(--text);line-height:1;}
+  .sc-val.hot{color:var(--acc);}
+  .sc-val.red{color:var(--red);}
+  .sc-note{font-size:9px;color:var(--dim);margin-top:4px;}
+
+  .two-up{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .block{border:1px solid var(--border);padding:14px;}
+  .block.accent-left{border-left:2px solid var(--acc);}
+  .block.accent-red{border-left:2px solid var(--red);}
+
+  .block-title{font-size:9px;letter-spacing:0.25em;color:var(--dim);margin-bottom:10px;}
+
+  /* momentum ring + number */
+  .mom-wrap{display:flex;align-items:center;gap:16px;}
+  .mom-ring{position:relative;width:64px;height:64px;flex-shrink:0;}
+  .mom-ring svg{transform:rotate(-90deg);}
+  .mom-ring-inner{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:500;
+  }
+  .mom-meta{}
+  .mom-score{font-size:36px;font-weight:300;line-height:1;color:var(--text);}
+  .mom-trend{font-size:10px;color:var(--acc);margin-top:3px;}
+  .mom-sub{font-size:9px;color:var(--dim);}
+
+  .flags{list-style:none;display:flex;flex-direction:column;gap:6px;}
+  .flag{
+    font-size:10px;color:rgba(255,200,80,0.7);
+    padding:7px 10px;background:rgba(255,85,0,0.04);
+    border-left:2px solid rgba(255,85,0,0.3);
+    line-height:1.4;
+  }
+
+  .queue{display:flex;flex-direction:column;gap:4px;}
+  .q-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;border:1px solid var(--border);
+    transition:all 0.15s;
+  }
+  .q-item:hover{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.02);}
+  .q-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+  .q-dot.crit{background:var(--red);}
+  .q-dot.high{background:var(--acc);}
+  .q-dot.med{background:var(--muted);}
+  .q-agent{font-size:8px;letter-spacing:0.1em;color:var(--dim);width:50px;flex-shrink:0;}
+  .q-text{font-size:11px;color:var(--muted);flex:1;}
+
+  .agents-compact{
+    display:grid;grid-template-columns:repeat(8,1fr);gap:1px;
+    background:var(--border);border:1px solid var(--border);
+  }
+  .ag{
+    padding:10px 4px;background:var(--bg);text-align:center;
+  }
+  .ag-i{font-size:14px;display:block;margin-bottom:4px;}
+  .ag-n{font-size:7px;letter-spacing:0.1em;color:var(--dim);display:block;margin-bottom:3px;}
+  .ag-s{font-size:8px;font-weight:500;}
+
+  .cmd{
+    padding:10px 20px;border-top:1px solid var(--border);
+    display:flex;align-items:center;gap:10px;
+  }
+  .p{color:var(--acc);font-size:14px;}
+  .ci{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-family:'DM Mono',monospace;font-size:12px;
+  }
+  .ci::placeholder{color:var(--dim);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">LEGACY OS</div>
+  <div class="status-row">
+    <div class="status-chip red">SURVIVAL</div>
+    <div class="status-chip hot">MOM 68 ▲</div>
+    <div class="status-chip red">RUNWAY 14D</div>
+    <div class="status-chip">8 AGENTS</div>
+  </div>
+  <div class="time">03:55<br>05.18.26</div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="stat-strip">
+    <div class="stat-cell">
+      <div class="sc-label">CASH</div>
+      <div class="sc-val">$847</div>
+      <div class="sc-note">on hand</div>
+    </div>
+    <div class="stat-cell">
+      <div class="sc-label">RUNWAY</div>
+      <div class="sc-val red">14d</div>
+      <div class="sc-note" style="color:var(--red)">critical</div>
+    </div>
+    <div class="stat-cell">
+      <div class="sc-label">BURN / DAY</div>
+      <div class="sc-val">$62</div>
+      <div class="sc-note">average</div>
+    </div>
+    <div class="stat-cell">
+      <div class="sc-label">RISK</div>
+      <div class="sc-val red" style="font-size:18px;padding-top:6px;">CRITICAL</div>
+      <div class="sc-note" style="color:var(--red)">below 30d floor</div>
+    </div>
+  </div>
+
+  <div class="two-up">
+
+    <div class="block accent-left">
+      <div class="block-title">MOMENTUM</div>
+      <div class="mom-wrap">
+        <div class="mom-ring">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#ff5500" stroke-width="4"
+              stroke-dasharray="163" stroke-dashoffset="49" stroke-linecap="round"/>
+          </svg>
+          <div class="mom-ring-inner" style="color:#ff5500">68</div>
+        </div>
+        <div class="mom-meta">
+          <div class="mom-score">68<span style="font-size:14px;color:var(--dim)">/100</span></div>
+          <div class="mom-trend">▲ UP — +12 pts</div>
+          <div class="mom-sub">5-day rolling</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block accent-red">
+      <div class="block-title">REALITY GUARD — 2 FLAGS</div>
+      <ul class="flags">
+        <li class="flag">Runway 14d — below 30d minimum. Cash emergency.</li>
+        <li class="flag">SURVIVAL phase. Zero income streams active. Contradiction.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="block">
+    <div class="block-title">NEXT ACTIONS</div>
+    <div class="queue">
+      <div class="q-item"><div class="q-dot crit"></div><div class="q-agent">CFO</div><div class="q-text">Activate income stream — runway critical at 14 days</div></div>
+      <div class="q-item"><div class="q-dot crit"></div><div class="q-agent">NOIRE</div><div class="q-text">Send 10 DMs today — 0 of 50 weekly touches</div></div>
+      <div class="q-item"><div class="q-dot high"></div><div class="q-agent">OPS</div><div class="q-text">Mark daily non-negs before midnight</div></div>
+      <div class="q-item"><div class="q-dot med"></div><div class="q-agent">HEALTH</div><div class="q-text">Log protein — 0g / 150g goal today</div></div>
+    </div>
+  </div>
+
+  <div class="agents-compact">
+    <div class="ag"><span class="ag-i" style="color:#00d4aa">◈</span><span class="ag-n">CFO</span><span class="ag-s" style="color:#ff2020">CRIT</span></div>
+    <div class="ag"><span class="ag-i">◎</span><span class="ag-n">OPS</span><span class="ag-s" style="color:var(--dim)">IDLE</span></div>
+    <div class="ag"><span class="ag-i" style="color:#ff6b35">◆</span><span class="ag-n">NOIRE</span><span class="ag-s" style="color:#ff5500">LOW</span></div>
+    <div class="ag"><span class="ag-i" style="color:#f59e0b">⚡</span><span class="ag-n">GUARD</span><span class="ag-s" style="color:#f59e0b">2</span></div>
+    <div class="ag"><span class="ag-i" style="color:#00ff88">◉</span><span class="ag-n">HEALTH</span><span class="ag-s" style="color:#00e87a">OK</span></div>
+    <div class="ag"><span class="ag-i" style="color:#60a5fa">◐</span><span class="ag-n">INTEL</span><span class="ag-s" style="color:#60a5fa">ON</span></div>
+    <div class="ag"><span class="ag-i" style="color:#9b6bff">◇</span><span class="ag-n">ARCH</span><span class="ag-s" style="color:#9b6bff">STBY</span></div>
+    <div class="ag"><span class="ag-i" style="color:#e879f9">∞</span><span class="ag-n">LEGACY</span><span class="ag-s" style="color:#e879f9">ON</span></div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="p">›</span>
+  <input class="ci" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>

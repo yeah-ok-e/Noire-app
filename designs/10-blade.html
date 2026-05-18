@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 — BLADE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#000;--surface:#070809;--card:#0c0e0f;
+    --text:#c8d8e8;--muted:rgba(200,216,232,0.45);--dim:rgba(200,216,232,0.2);
+    --border:rgba(200,216,232,0.1);--border-hi:rgba(0,188,255,0.3);
+    --cyan:#00bcff;--cyan-dim:rgba(0,188,255,0.12);
+    --red:#ff2840;--green:#00e890;--orange:#ff6820;--amber:#ffb020;
+    --purple:#8855ff;--magenta:#dd40e0;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;}
+  body{display:flex;flex-direction:column;font-family:'Rajdhani',sans-serif;font-size:14px;}
+
+  /* diagonal stripe texture */
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:repeating-linear-gradient(
+      -45deg,
+      rgba(0,188,255,0.01) 0px,
+      rgba(0,188,255,0.01) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+    pointer-events:none;z-index:0;
+  }
+  .w{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+
+  .header{
+    display:flex;align-items:stretch;
+    background:var(--surface);border-bottom:1px solid var(--border);
+    overflow:hidden;
+  }
+  .brand-block{
+    padding:10px 20px;border-right:1px solid var(--border);
+    display:flex;flex-direction:column;justify-content:center;
+    background:linear-gradient(135deg, rgba(0,188,255,0.04) 0%, transparent 100%);
+  }
+  .brand{font-size:20px;font-weight:700;letter-spacing:0.2em;color:var(--text);}
+  .brand span{color:var(--cyan);}
+  .brand-sub{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.2em;color:var(--dim);margin-top:2px;}
+  .header-stats{display:flex;flex:1;}
+  .hstat{
+    flex:1;padding:10px 14px;border-right:1px solid var(--border);
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .hstat:last-child{border-right:none;}
+  .hs-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.2em;color:var(--dim);margin-bottom:4px;}
+  .hs-val{font-size:18px;font-weight:700;line-height:1;color:var(--text);}
+  .hs-val.red{color:var(--red);}
+  .hs-val.cyan{color:var(--cyan);}
+  .hs-sub{font-size:10px;color:var(--dim);margin-top:2px;}
+  .phase-block{
+    padding:10px 20px;display:flex;align-items:center;
+    border-left:3px solid var(--red);background:rgba(255,40,64,0.04);
+  }
+  .phase-inner{}
+  .phase-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.2em;color:rgba(255,40,64,0.5);margin-bottom:2px;}
+  .phase-val{font-size:16px;font-weight:700;letter-spacing:0.15em;color:var(--red);}
+
+  .nav{
+    display:flex;border-bottom:1px solid var(--border);
+    background:var(--surface);
+  }
+  .nb{
+    flex:1;padding:8px 4px;text-align:center;
+    font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;
+    background:none;border:none;border-right:1px solid var(--border);
+    color:var(--dim);cursor:pointer;transition:all 0.15s;
+    position:relative;
+  }
+  .nb:last-child{border-right:none;}
+  .nb.on{color:var(--cyan);}
+  .nb.on::after{
+    content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;
+    background:var(--cyan);box-shadow:0 0 6px var(--cyan);
+  }
+  .nb:hover{color:var(--muted);}
+
+  .main{flex:1;overflow-y:auto;padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;}
+  .full{grid-column:1/-1;}
+
+  .blade{
+    background:var(--card);border:1px solid var(--border);padding:14px;
+    position:relative;overflow:hidden;
+  }
+  .blade::after{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+    opacity:0.3;
+  }
+  .blade.alert-red{border-color:rgba(255,40,64,0.2);}
+  .blade.alert-red::after{background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0.4;}
+
+  .blade-title{
+    font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.3em;
+    color:var(--cyan);margin-bottom:10px;opacity:0.7;
+    display:flex;justify-content:space-between;
+  }
+  .blade-title span{color:var(--dim);}
+
+  .data-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .dbox{padding:10px;background:rgba(0,188,255,0.04);border:1px solid var(--border);position:relative;}
+  .dbox::before{
+    content:'';position:absolute;top:0;left:0;width:2px;height:100%;
+    background:var(--cyan);opacity:0.3;
+  }
+  .dbox.red::before{background:var(--red);opacity:0.5;}
+  .db-l{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:0.2em;color:var(--dim);margin-bottom:5px;}
+  .db-v{font-size:22px;font-weight:700;line-height:1;color:var(--text);}
+  .db-v.red{color:var(--red);}
+  .db-v.cyan{color:var(--cyan);}
+  .db-n{font-size:9px;font-family:'Share Tech Mono',monospace;color:var(--dim);margin-top:3px;}
+
+  .mom-display{display:flex;align-items:flex-start;gap:14px;}
+  .mom-val{
+    font-size:56px;font-weight:700;line-height:1;
+    color:var(--cyan);text-shadow:0 0 20px rgba(0,188,255,0.3);
+  }
+  .mom-info{padding-top:8px;}
+  .mom-trend{
+    font-size:12px;font-weight:600;color:var(--green);letter-spacing:0.1em;
+    margin-bottom:4px;
+  }
+  .mom-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);}
+  .pixel-bars{display:flex;gap:3px;align-items:flex-end;height:24px;margin-top:8px;}
+  .pb{width:8px;border-radius:1px 1px 0 0;}
+
+  .guard-blade{
+    background:rgba(255,40,64,0.04);border:1px solid rgba(255,40,64,0.2);padding:14px;
+    position:relative;
+  }
+  .guard-blade::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0.5;}
+  .gb-hdr{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+  }
+  .gb-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.25em;color:rgba(255,40,64,0.6);}
+  .gb-count{
+    font-family:'Share Tech Mono',monospace;font-size:9px;
+    padding:2px 8px;border:1px solid rgba(255,40,64,0.3);color:var(--red);
+    background:rgba(255,40,64,0.08);
+  }
+  .gb-item{
+    font-size:12px;color:rgba(255,200,80,0.75);
+    padding:6px 0;border-bottom:1px solid rgba(255,40,64,0.08);
+    display:flex;gap:8px;line-height:1.4;
+  }
+  .gb-item:last-child{border-bottom:none;}
+  .gb-arrow{color:rgba(255,40,64,0.5);font-size:10px;flex-shrink:0;margin-top:2px;}
+
+  .queue{display:flex;flex-direction:column;gap:4px;}
+  .qi{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;
+    border:1px solid var(--border);background:var(--card);
+    border-left:3px solid transparent;transition:all 0.15s;cursor:default;
+  }
+  .qi.p1{border-left-color:var(--red);}
+  .qi.p2{border-left-color:var(--orange);}
+  .qi.p3{border-left-color:var(--amber);}
+  .qi:hover{background:rgba(0,188,255,0.03);border-color:var(--border-hi);}
+  .qi-src{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);width:50px;flex-shrink:0;letter-spacing:0.05em;}
+  .qi-src.red{color:var(--red);}
+  .qi-src.orange{color:var(--orange);}
+  .qi-text{font-size:12px;font-weight:500;color:var(--muted);flex:1;}
+
+  .agents-blade{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
+  .ab{
+    padding:10px 4px;text-align:center;border:1px solid var(--border);
+    background:var(--card);cursor:pointer;transition:all 0.15s;
+    position:relative;overflow:hidden;
+  }
+  .ab::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:currentColor;opacity:0.3;}
+  .ab:hover{border-color:var(--border-hi);background:rgba(0,188,255,0.04);}
+  .ab-i{font-size:15px;display:block;margin-bottom:4px;}
+  .ab-n{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:0.1em;color:var(--dim);display:block;margin-bottom:3px;}
+  .ab-s{font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:500;}
+
+  .cmd{
+    padding:9px 16px;border-top:1px solid var(--border);
+    display:flex;align-items:center;gap:10px;background:var(--surface);
+  }
+  .cp{color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:14px;text-shadow:0 0 8px rgba(0,188,255,0.5);}
+  .ci{
+    flex:1;background:none;border:none;outline:none;
+    color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;
+    caret-color:var(--cyan);
+  }
+  .ci::placeholder{color:var(--dim);}
+</style>
+</head>
+<body>
+<div class="w">
+
+<div class="header">
+  <div class="brand-block">
+    <div class="brand">LEGACY<span> OS</span></div>
+    <div class="brand-sub">MULTI-AGENT RUNTIME // v3</div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hs-label">CASH</div>
+      <div class="hs-val">$847</div>
+      <div class="hs-sub">on hand</div>
+    </div>
+    <div class="hstat">
+      <div class="hs-label">RUNWAY</div>
+      <div class="hs-val red">14D</div>
+      <div class="hs-sub" style="color:var(--red)">critical</div>
+    </div>
+    <div class="hstat">
+      <div class="hs-label">MOMENTUM</div>
+      <div class="hs-val cyan">68</div>
+      <div class="hs-sub">▲ rising</div>
+    </div>
+    <div class="hstat">
+      <div class="hs-label">AGENTS</div>
+      <div class="hs-val">8</div>
+      <div class="hs-sub">active</div>
+    </div>
+  </div>
+  <div class="phase-block">
+    <div class="phase-inner">
+      <div class="phase-label">PHASE</div>
+      <div class="phase-val">SURVIVAL</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="blade full">
+    <div class="blade-title">FINANCIAL STATUS <span>05.18.26 // LIVE</span></div>
+    <div class="data-4">
+      <div class="dbox">
+        <div class="db-l">CASH ON HAND</div>
+        <div class="db-v">$847</div>
+        <div class="db-n">current</div>
+      </div>
+      <div class="dbox red">
+        <div class="db-l">RUNWAY</div>
+        <div class="db-v red">14D</div>
+        <div class="db-n" style="color:var(--red)">CRITICAL</div>
+      </div>
+      <div class="dbox">
+        <div class="db-l">DAILY BURN</div>
+        <div class="db-v">$62</div>
+        <div class="db-n">per day avg</div>
+      </div>
+      <div class="dbox red">
+        <div class="db-l">INCOME STREAMS</div>
+        <div class="db-v red">0</div>
+        <div class="db-n" style="color:var(--red)">none active</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blade">
+    <div class="blade-title">MOMENTUM</div>
+    <div class="mom-display">
+      <div class="mom-val">68</div>
+      <div class="mom-info">
+        <div class="mom-trend">▲ UP +12</div>
+        <div class="mom-sub">5-day rolling</div>
+        <div class="pixel-bars">
+          <div class="pb" style="height:8px;background:var(--red)"></div>
+          <div class="pb" style="height:12px;background:var(--orange)"></div>
+          <div class="pb" style="height:16px;background:var(--amber)"></div>
+          <div class="pb" style="height:20px;background:var(--cyan);opacity:0.5"></div>
+          <div class="pb" style="height:24px;background:var(--cyan)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guard-blade">
+    <div class="gb-hdr">
+      <div class="gb-title">⚡ REALITY GUARD</div>
+      <div class="gb-count">2 FLAGS</div>
+    </div>
+    <div class="gb-item"><span class="gb-arrow">▸</span>Runway 14d — below 30d floor. Cash emergency.</div>
+    <div class="gb-item"><span class="gb-arrow">▸</span>SURVIVAL phase. Zero income streams. Contradiction.</div>
+  </div>
+
+  <div class="blade full">
+    <div class="blade-title">PRIORITY QUEUE <span>AGENT-GENERATED</span></div>
+    <div class="queue">
+      <div class="qi p1"><div class="qi-src red">CFO</div><div class="qi-text">Activate income stream — runway critical at 14 days</div></div>
+      <div class="qi p1"><div class="qi-src orange">NOIRE</div><div class="qi-text">Send 10 DMs today — 0 of 50 weekly touches sent</div></div>
+      <div class="qi p2"><div class="qi-src">OPS</div><div class="qi-text">Mark daily non-negs — not logged yet today</div></div>
+      <div class="qi p3"><div class="qi-src">HEALTH</div><div class="qi-text">Log protein — 0g / 150g goal today</div></div>
+    </div>
+  </div>
+
+  <div class="blade full">
+    <div class="blade-title">AGENT BOARD <span>8 ACTIVE</span></div>
+    <div class="agents-blade">
+      <div class="ab" style="color:#00d4aa"><span class="ab-i">◈</span><span class="ab-n">CFO</span><span class="ab-s" style="color:var(--red)">CRIT</span></div>
+      <div class="ab" style="color:var(--muted)"><span class="ab-i">◎</span><span class="ab-n">OPS</span><span class="ab-s" style="color:var(--dim)">IDLE</span></div>
+      <div class="ab" style="color:var(--orange)"><span class="ab-i">◆</span><span class="ab-n">NOIRE</span><span class="ab-s" style="color:var(--orange)">LOW</span></div>
+      <div class="ab" style="color:#ffb020"><span class="ab-i">⚡</span><span class="ab-n">GUARD</span><span class="ab-s" style="color:var(--amber)">2 FLAGS</span></div>
+      <div class="ab" style="color:var(--green)"><span class="ab-i">◉</span><span class="ab-n">HEALTH</span><span class="ab-s" style="color:var(--green)">OK</span></div>
+      <div class="ab" style="color:var(--cyan)"><span class="ab-i">◐</span><span class="ab-n">INTEL</span><span class="ab-s" style="color:var(--cyan)">ON</span></div>
+      <div class="ab" style="color:var(--purple)"><span class="ab-i">◇</span><span class="ab-n">ARCH</span><span class="ab-s" style="color:var(--purple)">STBY</span></div>
+      <div class="ab" style="color:var(--magenta)"><span class="ab-i">∞</span><span class="ab-n">LEGACY</span><span class="ab-s" style="color:var(--magenta)">ON</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="cp">›</span>
+  <input class="ci" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</div>
+</body>
+</html>
