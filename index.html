@@ -2,125 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="NOIRE Command Hub - Integrated command centre for metrics and performance tracking">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23000000' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23000' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>">
   <link rel="stylesheet" href="styles.css">
-  <title>NOIRE Command Hub</title>
+  <title>LEGACY OS</title>
 </head>
 <body>
-  <div class="container">
-    <!-- Navigation -->
-    <nav class="nav-bar">
-      <ul>
-        <li data-page="home" class="active">Home</li>
-        <li data-page="noire">Noire</li>
-        <li data-page="goals">Goals</li>
-        <li data-page="legacy">Legacy</li>
-      </ul>
-    </nav>
 
-    <!-- Pages -->
-    <div id="home" class="page active">
-      <div id="homeCard" class="card home-card">
-        <div id="cardDate" class="card-date">MON, MAY 13</div>
-        <div class="metrics">
-          <div class="metric">
-            <div class="metric-label">Cash on Hand</div>
-            <div class="metric-value" id="stateCash">0</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Gap to $1,048</div>
-            <div class="metric-value" id="stateGap">1,048</div>
-          </div>
-        </div>
-        <div class="metrics">
-          <div class="metric">
-            <div class="metric-label">Units Sold</div>
-            <div class="metric-value" id="stateSales">0</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Outbound</div>
-            <div class="metric-value" id="stateOutbound">0</div>
-          </div>
-        </div>
-        <div class="non-negs">
-          <span class="non-neg-label">Non-Negotiables:</span>
-          <div id="stateChecks" class="checks"></div>
-        </div>
-        <div class="marked-today">
-          <span class="marked-label">Marked:</span>
-          <span id="stateMarked" class="marked-value">·</span>
-        </div>
-        <p class="click-hint">Click card to edit</p>
+  <header class="os-header">
+    <div class="os-brand">LEGACY<span class="os-ver">OS</span></div>
+    <div class="agent-status-bar" id="agentStatusBar"></div>
+    <div class="os-time" id="osTime"></div>
+  </header>
+
+  <nav class="module-nav">
+    <button class="mod-btn active" data-module="home">HOME</button>
+    <button class="mod-btn" data-module="finance">FINANCE</button>
+    <button class="mod-btn" data-module="noire">NOIRE</button>
+    <button class="mod-btn" data-module="body">BODY</button>
+    <button class="mod-btn" data-module="agents">AGENTS</button>
+    <button class="mod-btn" data-module="legacy">LEGACY</button>
+  </nav>
+
+  <main class="os-main">
+    <section id="mod-home"    class="module active" data-agent="home"></section>
+    <section id="mod-finance" class="module"        data-agent="finance"></section>
+    <section id="mod-noire"   class="module"        data-agent="noire"></section>
+    <section id="mod-body"    class="module"        data-agent="body"></section>
+    <section id="mod-agents"  class="module"        data-agent="agents"></section>
+    <section id="mod-legacy"  class="module"        data-agent="legacy"></section>
+  </main>
+
+  <div class="cmd-bar" id="cmdBar">
+    <span class="cmd-prompt">›</span>
+    <input type="text" id="cmdInput" class="cmd-input"
+           placeholder="command… press / to focus · ? for help"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="cmd-help-btn" id="cmdHelpBtn">?</button>
+  </div>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle"></span>
+        <button class="modal-close" id="modalClose">✕</button>
       </div>
-
-      <!-- Edit Form -->
-      <form id="editForm" class="edit-form">
-        <div class="form-group">
-          <label for="editCash">Cash on Hand ($)</label>
-          <input type="number" id="editCash" min="0" step="0.01">
-        </div>
-        <div class="form-group">
-          <label for="editSales">Units Sold</label>
-          <input type="number" id="editSales" min="0">
-        </div>
-        <div class="form-group">
-          <label for="editOutbound">Outbound Touches</label>
-          <input type="number" id="editOutbound" min="0">
-        </div>
-        <div class="form-group">
-          <label for="editMarked">Marked Today</label>
-          <input type="text" id="editMarked" placeholder="Add a note...">
-        </div>
-        <button type="submit" class="btn-submit">Save</button>
-      </form>
-    </div>
-
-    <div id="noire" class="page">
-      <h2>Noire Metrics</h2>
-      <div id="noireStats" class="stats-container"></div>
-    </div>
-
-    <div id="goals" class="page">
-      <h2>Weekly Goals</h2>
-      <ul id="goalList" class="goal-list"></ul>
-    </div>
-
-    <div id="legacy" class="page">
-      <h2>Legacy Metrics</h2>
-      <div class="legacy-stats">
-        <div class="stat">
-          <div class="stat-label">Days Elapsed</div>
-          <div class="stat-value" id="legacyDays">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Workouts Completed</div>
-          <div class="stat-value" id="legacyWorkouts">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Rent Months Paid</div>
-          <div class="stat-value" id="legacyRent">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Total Units Sold</div>
-          <div class="stat-value" id="legacySales">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Total Revenue</div>
-          <div class="stat-value" id="legacyRevenue">$0</div>
-        </div>
-      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
   <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
-    }
-  </script>
 </body>
 </html>
