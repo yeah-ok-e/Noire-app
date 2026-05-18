@@ -1,5 +1,5 @@
-// NOIRE OS — Service Worker v2
-const CACHE = 'noire-os-v2';
+// LEGACY OS — Service Worker v3
+const CACHE = 'legacy-os-v3';
 const ASSETS = ['/', '/index.html', '/styles.css', '/app.js', '/manifest.json'];
 
 self.addEventListener('install', e => {

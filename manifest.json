@@ -1,7 +1,7 @@
 {
-  "name": "NOIRE OS",
-  "short_name": "NOIRE",
-  "description": "Multi-Agent AI Operating System — life, finances, brand, health, archive",
+  "name": "LEGACY OS",
+  "short_name": "LEGACY",
+  "description": "Multi-Agent AI Operating System — phase tracking, 8 agents, life, finances, brand, health, archive",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

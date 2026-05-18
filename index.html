@@ -9,45 +9,42 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23000' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white' font-family='monospace' font-weight='bold'>N</text></svg>">
   <link rel="stylesheet" href="styles.css">
-  <title>NOIRE OS</title>
+  <title>LEGACY OS</title>
 </head>
 <body>
 
-  <!-- OS Header -->
   <header class="os-header">
-    <div class="os-brand">NOIRE<span class="os-ver">OS</span></div>
+    <div class="os-brand">LEGACY<span class="os-ver">OS</span></div>
     <div class="agent-status-bar" id="agentStatusBar"></div>
     <div class="os-time" id="osTime"></div>
   </header>
 
-  <!-- Module Navigation -->
   <nav class="module-nav">
-    <button class="mod-btn active" data-module="life">LIFE</button>
+    <button class="mod-btn active" data-module="home">HOME</button>
     <button class="mod-btn" data-module="finance">FINANCE</button>
-    <button class="mod-btn" data-module="brand">BRAND</button>
-    <button class="mod-btn" data-module="health">HEALTH</button>
-    <button class="mod-btn" data-module="archive">ARCHIVE</button>
+    <button class="mod-btn" data-module="noire">NOIRE</button>
+    <button class="mod-btn" data-module="body">BODY</button>
+    <button class="mod-btn" data-module="agents">AGENTS</button>
+    <button class="mod-btn" data-module="legacy">LEGACY</button>
   </nav>
 
-  <!-- Module Pages (content injected by JS) -->
   <main class="os-main">
-    <section id="mod-life"    class="module active" data-agent="life"></section>
+    <section id="mod-home"    class="module active" data-agent="home"></section>
     <section id="mod-finance" class="module"        data-agent="finance"></section>
-    <section id="mod-brand"   class="module"        data-agent="brand"></section>
-    <section id="mod-health"  class="module"        data-agent="health"></section>
-    <section id="mod-archive" class="module"        data-agent="archive"></section>
+    <section id="mod-noire"   class="module"        data-agent="noire"></section>
+    <section id="mod-body"    class="module"        data-agent="body"></section>
+    <section id="mod-agents"  class="module"        data-agent="agents"></section>
+    <section id="mod-legacy"  class="module"        data-agent="legacy"></section>
   </main>
 
-  <!-- Command Terminal -->
   <div class="cmd-bar" id="cmdBar">
     <span class="cmd-prompt">›</span>
     <input type="text" id="cmdInput" class="cmd-input"
-           placeholder="command… or press / to focus"
+           placeholder="command… press / to focus · ? for help"
            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <button class="cmd-help-btn" id="cmdHelpBtn">?</button>
   </div>
 
-  <!-- Modal / Bottom Sheet -->
   <div class="overlay" id="overlay" hidden>
     <div class="modal" id="modal">
       <div class="modal-header">
