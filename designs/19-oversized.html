@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>19 — OVERSIZED</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Roboto+Mono:wght@300;400;500&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;color:#fff;overflow:hidden;}
+  body{display:flex;flex-direction:column;font-family:'Roboto Mono',monospace;font-size:11px;}
+
+  @keyframes float-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+  @keyframes counter{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes bar-in{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1)}}
+  @keyframes blink-red{0%,100%{color:#ff1e1e;opacity:1}50%{color:#ff4444;opacity:0.7}}
+  @keyframes glow-g{0%,100%{text-shadow:none}50%{text-shadow:0 0 12px rgba(0,255,64,0.4)}}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes ping{0%{transform:scale(1);opacity:1}75%{transform:scale(2.5);opacity:0}100%{transform:scale(2.5);opacity:0}}
+
+  /* scrolling bottom status */
+  .status-bar{
+    order:99;padding:6px 0;background:rgba(255,255,255,0.04);
+    border-top:1px solid rgba(255,255,255,0.08);overflow:hidden;
+    flex-shrink:0;
+  }
+  .sb-inner{
+    display:inline-flex;white-space:nowrap;
+    animation:marquee 25s linear infinite;
+    font-size:8px;letter-spacing:0.2em;color:rgba(255,255,255,0.25);
+  }
+  .sbi{padding:0 28px;border-right:1px solid rgba(255,255,255,0.1);}
+  .sbi.r{color:rgba(255,30,30,0.6);}
+  .sbi.g{color:rgba(0,200,60,0.6);}
+
+  .header{
+    padding:18px 32px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,0.07);
+    animation:float-up 0.4s ease both;
+  }
+  .brand{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:0.1em;}
+  .header-pills{display:flex;gap:6px;}
+  .pill{
+    padding:5px 12px;border:1px solid rgba(255,255,255,0.1);
+    font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.3);
+    border-radius:1px;
+  }
+  .pill.red{border-color:rgba(255,30,30,0.3);color:#ff1e1e;}
+  .pill.green{border-color:rgba(0,200,60,0.3);color:#00c83c;}
+  .time-pill{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;}
+
+  .nav{
+    display:flex;padding:0 32px;border-bottom:1px solid rgba(255,255,255,0.07);
+    animation:float-up 0.4s 0.05s ease both;opacity:0;
+  }
+  .nb{
+    padding:10px 14px;font-size:8px;letter-spacing:0.25em;
+    background:none;border:none;color:rgba(255,255,255,0.2);
+    cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px;
+    transition:all 0.2s;
+  }
+  .nb.on{color:#fff;border-bottom-color:#fff;}
+
+  .main{flex:1;overflow-y:auto;}
+
+  /* OVERSIZED hero stats — take up real estate */
+  .hero-band{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-bottom:1px solid rgba(255,255,255,0.07);
+  }
+  .hero-stat{
+    padding:36px 32px;border-right:1px solid rgba(255,255,255,0.07);
+    animation:float-up 0.5s ease both;opacity:0;
+    position:relative;overflow:hidden;
+  }
+  .hero-stat:last-child{border-right:none;}
+  .hs1{animation-delay:0.15s}.hs2{animation-delay:0.2s}.hs3{animation-delay:0.25s}.hs4{animation-delay:0.3s}
+  .hs-label{font-size:7px;letter-spacing:0.35em;color:rgba(255,255,255,0.2);margin-bottom:12px;}
+  .hs-val{
+    font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1;
+    animation:counter 0.5s ease both;animation-delay:inherit;
+  }
+  .hs-val.red{color:#ff1e1e;animation:blink-red 3s ease-in-out infinite;}
+  .hs-val.green{color:#00c83c;animation:glow-g 3s ease-in-out infinite;}
+  .hs-sub{font-size:9px;color:rgba(255,255,255,0.2);margin-top:8px;line-height:1.4;}
+  .hs-ping{
+    position:absolute;top:20px;right:20px;
+    width:8px;height:8px;border-radius:50%;
+  }
+  .hs-ping.red{background:#ff1e1e;}
+  .hs-ping.green{background:#00c83c;}
+  .hs-ping::before{
+    content:'';position:absolute;inset:0;border-radius:50%;background:inherit;
+    animation:ping 1.5s ease-out infinite;
+  }
+
+  .content-area{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .c-left{border-right:1px solid rgba(255,255,255,0.07);}
+
+  .section{padding:36px 32px;border-bottom:1px solid rgba(255,255,255,0.07);}
+
+  .sec-label{font-size:7px;letter-spacing:0.4em;color:rgba(255,255,255,0.2);margin-bottom:24px;}
+
+  /* oversized momentum */
+  .mom-block{animation:float-up 0.5s 0.3s ease both;opacity:0;}
+  .mom-number{
+    font-family:'Syne',sans-serif;font-size:120px;font-weight:800;line-height:1;
+    animation:reveal 0.8s 0.4s ease both;clip-path:inset(0 100% 0 0);
+  }
+  .mom-meta{
+    display:flex;align-items:center;gap:16px;margin-top:12px;padding-top:12px;
+    border-top:1px solid rgba(255,255,255,0.07);
+  }
+  .mom-trend{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#00c83c;animation:glow-g 2.5s ease-in-out infinite;}
+  .mom-sub{font-size:9px;color:rgba(255,255,255,0.25);}
+  .domain-bars{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+  .db-row{display:flex;align-items:center;gap:12px;}
+  .db-label{font-size:8px;color:rgba(255,255,255,0.2);width:64px;}
+  .db-track{flex:1;height:2px;background:rgba(255,255,255,0.07);}
+  .db-fill{height:100%;animation:bar-in 1s ease both;}
+  .db-val{font-size:9px;color:rgba(255,255,255,0.25);width:22px;text-align:right;}
+
+  /* guard oversized */
+  .guard-section{
+    background:rgba(255,30,30,0.03);border-bottom:1px solid rgba(255,30,30,0.15);
+    animation:float-up 0.5s 0.35s ease both;opacity:0;
+  }
+  .guard-label{
+    display:flex;align-items:center;gap:8px;margin-bottom:20px;
+  }
+  .gl-dot{width:8px;height:8px;border-radius:50%;background:#ff1e1e;animation:ping 1.5s ease-out infinite;}
+  .gl-text{font-size:7px;letter-spacing:0.35em;color:rgba(255,30,30,0.5);}
+  .guard-entry{
+    font-size:14px;color:rgba(255,255,255,0.5);padding:16px 0;
+    border-bottom:1px solid rgba(255,30,30,0.08);line-height:1.7;
+    display:flex;gap:14px;
+    animation:float-up 0.4s ease both;opacity:0;
+  }
+  .guard-entry:nth-child(2){animation-delay:0.5s}.guard-entry:nth-child(3){animation-delay:0.6s}
+  .guard-entry:last-child{border-bottom:none;}
+  .ge-flag{color:#ff1e1e;font-size:10px;margin-top:4px;flex-shrink:0;}
+
+  /* actions — oversized */
+  .action-item{
+    display:flex;gap:20px;padding:22px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+    animation:float-up 0.4s ease both;opacity:0;
+  }
+  .action-item:nth-child(1){animation-delay:0.4s}.action-item:nth-child(2){animation-delay:0.5s}
+  .action-item:nth-child(3){animation-delay:0.6s}.action-item:nth-child(4){animation-delay:0.7s}
+  .action-item:last-child{border-bottom:none;}
+  .ai-num{
+    font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:rgba(255,255,255,0.08);
+    flex-shrink:0;line-height:1.2;width:36px;
+  }
+  .ai-num.red{color:rgba(255,30,30,0.3);}
+  .ai-body{}
+  .ai-src{font-size:7px;letter-spacing:0.25em;color:rgba(255,255,255,0.2);margin-bottom:5px;}
+  .ai-text{font-size:15px;color:rgba(255,255,255,0.6);line-height:1.4;}
+
+  /* agents — oversized row */
+  .agents-band{
+    display:grid;grid-template-columns:repeat(8,1fr);
+    border-bottom:1px solid rgba(255,255,255,0.07);
+    animation:float-up 0.5s 0.5s ease both;opacity:0;
+  }
+  .ab{
+    padding:24px 16px;text-align:center;
+    border-right:1px solid rgba(255,255,255,0.07);
+  }
+  .ab:last-child{border-right:none;}
+  .ab-dot{
+    width:10px;height:10px;border-radius:50%;margin:0 auto 10px;
+    position:relative;
+  }
+  .ab-dot.red{background:#ff1e1e;}
+  .ab-dot.red::before{content:'';position:absolute;inset:0;border-radius:50%;background:#ff1e1e;animation:ping 1.5s ease-out infinite;}
+  .ab-dot.green{background:#00c83c;}
+  .ab-dot.green::before{content:'';position:absolute;inset:0;border-radius:50%;background:#00c83c;animation:ping 2s ease-out infinite;}
+  .ab-dot.dim{background:rgba(255,255,255,0.15);}
+  .ab-dot.warn{background:rgba(220,140,0,0.7);}
+  .ab-name{font-size:7px;letter-spacing:0.12em;color:rgba(255,255,255,0.25);margin-bottom:5px;}
+  .ab-status{font-size:9px;font-weight:500;letter-spacing:0.05em;}
+  .ab-status.red{animation:blink-red 2s ease-in-out infinite;}
+  .ab-status.green{animation:glow-g 3s ease-in-out infinite;}
+  .ab-status.dim{color:rgba(255,255,255,0.15);}
+  .ab-status.warn{color:rgba(220,140,0,0.7);}
+
+  .cmd{
+    padding:14px 32px;border-top:1px solid rgba(255,255,255,0.07);
+    display:flex;align-items:center;gap:10px;background:#000;
+    animation:float-up 0.4s 0.7s ease both;opacity:0;
+  }
+  .cp{color:rgba(255,255,255,0.2);font-family:'Roboto Mono',monospace;font-size:15px;}
+  .ci{
+    flex:1;background:none;border:none;outline:none;
+    color:#fff;font-family:'Roboto Mono',monospace;font-size:12px;
+  }
+  .ci::placeholder{color:rgba(255,255,255,0.12);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">LEGACY OS</div>
+  <div class="header-pills">
+    <div class="pill red">SURVIVAL</div>
+    <div class="pill red">RUNWAY 14D</div>
+    <div class="pill green">MOM 68 ↑</div>
+    <div class="pill">8 AGENTS</div>
+  </div>
+  <div class="time-pill">03:55 — 05.18.26</div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="hero-band">
+    <div class="hero-stat hs1">
+      <div class="hs-ping green"></div>
+      <div class="hs-label">CASH ON HAND</div>
+      <div class="hs-val">$847</div>
+      <div class="hs-sub">current balance</div>
+    </div>
+    <div class="hero-stat hs2">
+      <div class="hs-ping red"></div>
+      <div class="hs-label">RUNWAY</div>
+      <div class="hs-val red">14d</div>
+      <div class="hs-sub">critical — below 30d floor</div>
+    </div>
+    <div class="hero-stat hs3">
+      <div class="hs-ping green"></div>
+      <div class="hs-label">MOMENTUM</div>
+      <div class="hs-val green">68</div>
+      <div class="hs-sub">5-day roll — ▲ rising</div>
+    </div>
+    <div class="hero-stat hs4">
+      <div class="hs-ping red"></div>
+      <div class="hs-label">RISK LEVEL</div>
+      <div class="hs-val red" style="font-size:28px;padding-top:12px;">CRITICAL</div>
+      <div class="hs-sub">0 income streams active</div>
+    </div>
+  </div>
+
+  <div class="agents-band">
+    <div class="ab"><div class="ab-dot red"></div><div class="ab-name">CFO</div><div class="ab-status red">CRITICAL</div></div>
+    <div class="ab"><div class="ab-dot dim"></div><div class="ab-name">OPERATOR</div><div class="ab-status dim">IDLE</div></div>
+    <div class="ab"><div class="ab-dot warn"></div><div class="ab-name">NOIRE</div><div class="ab-status warn">LOW VOL</div></div>
+    <div class="ab"><div class="ab-dot warn"></div><div class="ab-name">GUARD</div><div class="ab-status warn">2 FLAGS</div></div>
+    <div class="ab"><div class="ab-dot green"></div><div class="ab-name">HEALTH</div><div class="ab-status green">CLEAR</div></div>
+    <div class="ab"><div class="ab-dot green"></div><div class="ab-name">INTEL</div><div class="ab-status green">ON</div></div>
+    <div class="ab"><div class="ab-dot dim"></div><div class="ab-name">ARCHIVIST</div><div class="ab-status dim">STBY</div></div>
+    <div class="ab"><div class="ab-dot green"></div><div class="ab-name">LEGACY</div><div class="ab-status green">ACTIVE</div></div>
+  </div>
+
+  <div class="content-area">
+    <div class="c-left">
+
+      <div class="section mom-block">
+        <div class="sec-label">MOMENTUM SCORE</div>
+        <div class="mom-number">68</div>
+        <div class="mom-meta">
+          <div class="mom-trend">▲ +12 pts</div>
+          <div class="mom-sub">5-day rolling average</div>
+        </div>
+        <div class="domain-bars">
+          <div class="db-row"><div class="db-label">HEALTH</div><div class="db-track"><div class="db-fill" style="width:80%;background:#00c83c;animation-delay:0.8s"></div></div><div class="db-val">80</div></div>
+          <div class="db-row"><div class="db-label">NOIRE</div><div class="db-track"><div class="db-fill" style="width:55%;background:#fff;animation-delay:1s"></div></div><div class="db-val">55</div></div>
+          <div class="db-row"><div class="db-label">FINANCE</div><div class="db-track"><div class="db-fill" style="width:40%;background:#ff1e1e;animation-delay:1.2s"></div></div><div class="db-val" style="color:#ff1e1e">40</div></div>
+        </div>
+      </div>
+
+      <div class="section guard-section">
+        <div class="guard-label">
+          <div class="gl-dot"></div>
+          <div class="gl-text">REALITY GUARD — 2 FLAGS</div>
+        </div>
+        <div class="guard-entry"><span class="ge-flag">▸</span>Runway at 14 days — below the 30 day minimum floor. This is a cash emergency requiring immediate action.</div>
+        <div class="guard-entry"><span class="ge-flag">▸</span>SURVIVAL phase is active with zero income streams. This is a direct operational contradiction.</div>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="section">
+        <div class="sec-label">NEXT ACTIONS — AGENT QUEUE</div>
+        <div class="action-item"><div class="ai-num red">01</div><div class="ai-body"><div class="ai-src">CFO AGENT</div><div class="ai-text">Activate income stream — runway critical at 14 days</div></div></div>
+        <div class="action-item"><div class="ai-num red">02</div><div class="ai-body"><div class="ai-src">NOIRE STRATEGIST</div><div class="ai-text">Send 10 DMs today — 0 of 50 weekly</div></div></div>
+        <div class="action-item"><div class="ai-num">03</div><div class="ai-body"><div class="ai-src">OPERATOR</div><div class="ai-text">Log daily non-negs before midnight</div></div></div>
+        <div class="action-item"><div class="ai-num">04</div><div class="ai-body"><div class="ai-src">HEALTH</div><div class="ai-text">Log protein — 0g / 150g today</div></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div class="sb-inner">
+    <div class="sbi r">● SURVIVAL</div>
+    <div class="sbi r">RUNWAY 14D — CRITICAL</div>
+    <div class="sbi">CASH $847</div>
+    <div class="sbi">BURN $62/D</div>
+    <div class="sbi g">● MOM 68 RISING</div>
+    <div class="sbi r">GUARD: 2 FLAGS</div>
+    <div class="sbi g">● HEALTH CLEAR</div>
+    <div class="sbi g">● LEGACY ACTIVE</div>
+    <!-- duplicate -->
+    <div class="sbi r">● SURVIVAL</div>
+    <div class="sbi r">RUNWAY 14D — CRITICAL</div>
+    <div class="sbi">CASH $847</div>
+    <div class="sbi">BURN $62/D</div>
+    <div class="sbi g">● MOM 68 RISING</div>
+    <div class="sbi r">GUARD: 2 FLAGS</div>
+    <div class="sbi g">● HEALTH CLEAR</div>
+    <div class="sbi g">● LEGACY ACTIVE</div>
+  </div>
+</div>
+
+<div class="cmd">
+  <span class="cp">›</span>
+  <input class="ci" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>

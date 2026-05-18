@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 — TYPEWRITER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;color:#fff;font-family:'Courier Prime',monospace;font-size:14px;overflow:hidden;}
+  body{display:flex;flex-direction:column;}
+
+  @keyframes type-in{
+    from{width:0;border-right:2px solid #fff}
+    to{width:100%;border-right:2px solid transparent}
+  }
+  @keyframes cursor-blink{0%,100%{border-color:#fff}50%{border-color:transparent}}
+  @keyframes appear{from{opacity:0}to{opacity:1}}
+  @keyframes line-draw{from{width:0}to{width:100%}}
+  @keyframes count{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+  @keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.6}94%{opacity:1}97%{opacity:0.8}98%{opacity:1}}
+  @keyframes slide-up{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes progress{from{width:0}to{width:var(--p)}}
+
+  .header{
+    padding:28px 36px;border-bottom:1px solid rgba(255,255,255,0.1);
+    display:flex;justify-content:space-between;align-items:flex-start;
+    animation:appear 0.3s ease both;
+  }
+  .brand-area{}
+  .brand{
+    font-size:28px;font-weight:700;letter-spacing:0.2em;
+    animation:flicker 8s ease-in-out infinite;
+  }
+  .brand-line{
+    height:1px;background:#fff;margin-top:4px;
+    animation:line-draw 0.8s 0.3s ease both;width:0;
+  }
+  .brand-sub{font-size:9px;letter-spacing:0.3em;color:rgba(255,255,255,0.3);margin-top:6px;animation:appear 0.5s 0.5s ease both;opacity:0;}
+
+  .status-col{text-align:center;animation:appear 0.5s 0.4s ease both;opacity:0;}
+  .status-label{font-size:8px;letter-spacing:0.3em;color:rgba(255,255,255,0.25);margin-bottom:6px;}
+  .status-val{
+    font-size:13px;letter-spacing:0.2em;font-weight:700;color:#ff1e1e;
+    animation:flicker 6s 1s ease-in-out infinite;
+  }
+  .status-cursor{display:inline-block;animation:cursor-blink 1s step-end infinite;}
+
+  .time-col{text-align:right;animation:appear 0.5s 0.6s ease both;opacity:0;}
+  .time{font-size:26px;letter-spacing:0.1em;}
+  .date{font-size:9px;letter-spacing:0.2em;color:rgba(255,255,255,0.3);margin-top:4px;}
+
+  .nav{
+    display:flex;padding:0 36px;border-bottom:1px solid rgba(255,255,255,0.08);
+    animation:appear 0.5s 0.7s ease both;opacity:0;
+  }
+  .nb{
+    padding:12px 16px;font-family:'Courier Prime',monospace;font-size:10px;
+    letter-spacing:0.2em;font-weight:700;background:none;border:none;
+    border-bottom:1px solid transparent;color:rgba(255,255,255,0.2);
+    cursor:pointer;transition:all 0.2s;margin-bottom:-1px;
+  }
+  .nb.on{color:#fff;border-bottom-color:#fff;}
+
+  .main{flex:1;overflow-y:auto;padding:36px;}
+  .page{display:grid;grid-template-columns:1fr 1fr;gap:36px;}
+
+  /* typewriter text reveal */
+  .tw-block{margin-bottom:36px;animation:slide-up 0.5s ease both;opacity:0;}
+  .tw-block:nth-child(1){animation-delay:0.8s}
+  .tw-block:nth-child(2){animation-delay:0.9s}
+  .tw-block:nth-child(3){animation-delay:1.0s}
+  .tw-block:nth-child(4){animation-delay:1.1s}
+  .tw-block:nth-child(5){animation-delay:1.2s}
+
+  .tw-label{
+    font-size:8px;letter-spacing:0.4em;color:rgba(255,255,255,0.2);margin-bottom:16px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .tw-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
+
+  /* big monospace metrics */
+  .metric-row{display:flex;gap:0;margin-bottom:24px;}
+  .metric{
+    flex:1;padding:24px 20px;border:1px solid rgba(255,255,255,0.07);
+    border-right:none;
+  }
+  .metric:last-child{border-right:1px solid rgba(255,255,255,0.07);}
+  .m-label{font-size:8px;letter-spacing:0.25em;color:rgba(255,255,255,0.25);margin-bottom:12px;}
+  .m-val{font-size:38px;line-height:1;font-weight:700;}
+  .m-val.red{color:#ff1e1e;}
+  .m-val.green{color:#00ff50;}
+  .m-note{font-size:9px;color:rgba(255,255,255,0.2);margin-top:8px;}
+
+  /* typed text lines */
+  .typed-line{
+    font-size:14px;color:rgba(255,255,255,0.7);line-height:1.8;
+    overflow:hidden;white-space:nowrap;
+    animation:type-in 0.8s steps(50,end) both;
+    border-right:2px solid transparent;
+  }
+  .typed-line:nth-child(1){animation-delay:0.9s;animation-duration:0.6s}
+  .typed-line:nth-child(2){animation-delay:1.6s;animation-duration:0.8s}
+  .typed-line:nth-child(3){animation-delay:2.5s;animation-duration:0.7s}
+  .typed-line:nth-child(4){animation-delay:3.3s;animation-duration:0.6s}
+  .typed-line:last-child{border-right:2px solid #fff;animation:type-in 0.6s steps(40,end) 4s both,cursor-blink 1s 4.7s step-end infinite;}
+  .line-agent{color:rgba(255,255,255,0.3);font-size:11px;}
+  .line-red{color:#ff1e1e;}
+  .line-green{color:#00ff50;}
+
+  /* momentum */
+  .mom-giant{
+    font-size:96px;font-weight:700;line-height:1;
+    animation:count 0.5s 1s ease both;opacity:0;
+  }
+  .mom-context{
+    font-size:13px;color:rgba(255,255,255,0.4);margin-top:12px;line-height:2;
+  }
+  .mom-arrow{color:#00ff50;font-size:18px;}
+
+  /* guard */
+  .guard-box{
+    border:1px solid rgba(255,30,30,0.2);padding:28px;
+  }
+  .guard-head{
+    font-size:9px;letter-spacing:0.3em;color:rgba(255,30,30,0.6);
+    margin-bottom:20px;display:flex;align-items:center;gap:8px;
+  }
+  .ghead-dot{
+    width:7px;height:7px;border-radius:50%;background:#ff1e1e;
+    animation:cursor-blink 1s step-end infinite;
+  }
+  .guard-line{
+    font-size:13px;color:rgba(255,255,255,0.55);padding:12px 0;
+    border-bottom:1px dotted rgba(255,255,255,0.07);line-height:1.6;
+    overflow:hidden;white-space:nowrap;
+    animation:type-in 0.9s steps(60,end) both;
+  }
+  .guard-line:nth-child(2){animation-delay:1.2s}
+  .guard-line:nth-child(3){animation-delay:2.2s}
+  .guard-line:last-child{border-bottom:none;}
+  .gl-prefix{color:#ff1e1e;}
+
+  /* progress bars — handdrawn feel */
+  .prog-rows{display:flex;flex-direction:column;gap:14px;margin-top:16px;}
+  .pr{display:flex;align-items:center;gap:14px;}
+  .pr-label{font-size:9px;letter-spacing:0.15em;color:rgba(255,255,255,0.3);width:80px;}
+  .pr-track{
+    flex:1;height:1px;background:rgba(255,255,255,0.1);position:relative;
+  }
+  .pr-fill{
+    position:absolute;top:-1px;left:0;height:3px;background:#fff;
+    animation:progress 1.2s ease both;
+  }
+  .pr-fill.red{background:#ff1e1e;}
+  .pr-val{font-size:10px;color:rgba(255,255,255,0.3);width:24px;text-align:right;}
+
+  /* agent list — simple rows */
+  .agent-rows{display:flex;flex-direction:column;gap:0;}
+  .ar{
+    display:flex;align-items:center;gap:16px;padding:16px 0;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    animation:slide-up 0.3s ease both;opacity:0;
+  }
+  .ar:nth-child(1){animation-delay:0.9s}
+  .ar:nth-child(2){animation-delay:1.0s}
+  .ar:nth-child(3){animation-delay:1.1s}
+  .ar:nth-child(4){animation-delay:1.2s}
+  .ar:nth-child(5){animation-delay:1.3s}
+  .ar:nth-child(6){animation-delay:1.4s}
+  .ar:nth-child(7){animation-delay:1.5s}
+  .ar:nth-child(8){animation-delay:1.6s}
+  .ar:last-child{border-bottom:none;}
+  .ar-bullet{font-size:16px;color:rgba(255,255,255,0.1);}
+  .ar-name{flex:1;font-size:12px;letter-spacing:0.1em;color:rgba(255,255,255,0.6);}
+  .ar-status{font-size:10px;letter-spacing:0.15em;}
+  .st-red{color:#ff1e1e;}
+  .st-green{color:#00ff50;}
+  .st-dim{color:rgba(255,255,255,0.2);}
+  .st-warn{color:rgba(255,160,0,0.8);}
+
+  .cmd{
+    padding:16px 36px;border-top:1px solid rgba(255,255,255,0.08);
+    display:flex;align-items:center;gap:12px;
+    animation:appear 0.5s 1.5s ease both;opacity:0;
+  }
+  .cp{color:rgba(255,255,255,0.4);font-size:16px;}
+  .ci{
+    flex:1;background:none;border:none;outline:none;
+    color:#fff;font-family:'Courier Prime',monospace;font-size:13px;
+  }
+  .ci::placeholder{color:rgba(255,255,255,0.15);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand-area">
+    <div class="brand">LEGACY OS</div>
+    <div class="brand-line"></div>
+    <div class="brand-sub">MULTI-AGENT OPERATING SYSTEM</div>
+  </div>
+  <div class="status-col">
+    <div class="status-label">CURRENT PHASE</div>
+    <div class="status-val">SURVIVAL<span class="status-cursor">_</span></div>
+  </div>
+  <div class="time-col">
+    <div class="time">03:55</div>
+    <div class="date">05.18.2026 — MON</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+<div class="page">
+
+  <div>
+    <div class="tw-block">
+      <div class="tw-label">FINANCIAL POSITION</div>
+      <div class="metric-row">
+        <div class="metric">
+          <div class="m-label">CASH</div>
+          <div class="m-val">$847</div>
+          <div class="m-note">on hand</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">RUNWAY</div>
+          <div class="m-val red">14d</div>
+          <div class="m-note" style="color:#ff1e1e">critical</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">BURN</div>
+          <div class="m-val" style="font-size:24px;padding-top:8px">$62/d</div>
+          <div class="m-note">avg</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tw-block">
+      <div class="tw-label">REALITY GUARD</div>
+      <div class="guard-box">
+        <div class="guard-head"><div class="ghead-dot"></div>2 ACTIVE FLAGS DETECTED</div>
+        <div class="guard-line"><span class="gl-prefix">[!] </span>Runway 14d — below 30 day minimum floor.</div>
+        <div class="guard-line"><span class="gl-prefix">[!] </span>SURVIVAL phase. Zero income streams. Contradiction.</div>
+      </div>
+    </div>
+
+    <div class="tw-block">
+      <div class="tw-label">MOMENTUM</div>
+      <div class="mom-giant">68</div>
+      <div class="mom-context">
+        <span class="mom-arrow">▲</span> RISING — +12 points this week<br>
+        <span style="color:rgba(255,255,255,0.2)">5-day rolling average score</span>
+      </div>
+      <div class="prog-rows">
+        <div class="pr"><div class="pr-label">HEALTH</div><div class="pr-track"><div class="pr-fill" style="--p:80%;width:80%;animation-delay:1.1s"></div></div><div class="pr-val">80</div></div>
+        <div class="pr"><div class="pr-label">NOIRE</div><div class="pr-track"><div class="pr-fill" style="--p:55%;width:55%;animation-delay:1.3s"></div></div><div class="pr-val">55</div></div>
+        <div class="pr"><div class="pr-label">FINANCE</div><div class="pr-track"><div class="pr-fill red" style="--p:40%;width:40%;animation-delay:1.5s"></div></div><div class="pr-val" style="color:#ff1e1e">40</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="tw-block">
+      <div class="tw-label">NEXT ACTIONS — AGENT QUEUE</div>
+      <div class="typed-line"><span class="line-agent">[CFO]&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="line-red">Activate income stream — runway critical</span></div>
+      <div class="typed-line"><span class="line-agent">[NOIRE]&nbsp;&nbsp;</span><span class="line-red">Send 10 DMs — 0/50 weekly touches</span></div>
+      <div class="typed-line"><span class="line-agent">[OPS]&nbsp;&nbsp;&nbsp;&nbsp;</span>Log daily non-negs before midnight</div>
+      <div class="typed-line"><span class="line-agent">[HEALTH]&nbsp;</span>Log protein — 0g / 150g today</div>
+      <div class="typed-line"><span class="line-agent">[LEGACY]&nbsp;</span><span class="line-green">Archive running — legacy is being built</span></div>
+    </div>
+
+    <div class="tw-block">
+      <div class="tw-label">AGENT BOARD — 8 ACTIVE</div>
+      <div class="agent-rows">
+        <div class="ar"><div class="ar-bullet">▸</div><div class="ar-name">CFO</div><div class="ar-status st-red">CRITICAL</div></div>
+        <div class="ar"><div class="ar-bullet">·</div><div class="ar-name">OPERATOR</div><div class="ar-status st-dim">IDLE</div></div>
+        <div class="ar"><div class="ar-bullet">▸</div><div class="ar-name">NOIRE STRATEGIST</div><div class="ar-status st-warn">LOW VOLUME</div></div>
+        <div class="ar"><div class="ar-bullet">▸</div><div class="ar-name">REALITY GUARD</div><div class="ar-status st-warn">2 FLAGS</div></div>
+        <div class="ar"><div class="ar-bullet">◆</div><div class="ar-name">HEALTH</div><div class="ar-status st-green">CLEAR</div></div>
+        <div class="ar"><div class="ar-bullet">◆</div><div class="ar-name">INTELLIGENCE</div><div class="ar-status st-green">WATCHING</div></div>
+        <div class="ar"><div class="ar-bullet">·</div><div class="ar-name">ARCHIVIST</div><div class="ar-status st-dim">STANDBY</div></div>
+        <div class="ar"><div class="ar-bullet">◆</div><div class="ar-name">LEGACY</div><div class="ar-status st-green">ACTIVE</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="cmd">
+  <span class="cp">›</span>
+  <input class="ci" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>

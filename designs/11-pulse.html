@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 — PULSE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;color:#fff;font-family:'Share Tech Mono',monospace;overflow:hidden;}
+  body{display:flex;flex-direction:column;}
+
+  @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(255,30,30,0.4)}50%{box-shadow:0 0 0 10px rgba(255,30,30,0)}}
+  @keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(0,255,80,0.4)}50%{box-shadow:0 0 0 10px rgba(0,255,80,0)}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes slide-right{from{width:0}to{width:var(--w)}}
+  @keyframes count-up{from{opacity:0}to{opacity:1}}
+  @keyframes scan{0%{top:-100%}100%{top:100%}}
+  @keyframes glow-red{0%,100%{text-shadow:0 0 4px rgba(255,30,30,0.3)}50%{text-shadow:0 0 16px rgba(255,30,30,0.8)}}
+  @keyframes glow-green{0%,100%{text-shadow:0 0 4px rgba(0,255,80,0.3)}50%{text-shadow:0 0 16px rgba(0,255,80,0.7)}}
+  @keyframes float-up{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+
+  .header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 32px;border-bottom:1px solid rgba(255,255,255,0.1);
+    animation:float-up 0.6s ease both;
+  }
+  .brand{font-size:22px;letter-spacing:0.4em;font-weight:400;}
+  .brand-sub{font-size:9px;letter-spacing:0.3em;color:rgba(255,255,255,0.3);margin-top:4px;}
+  .header-center{}
+  .phase-wrap{text-align:center;animation:float-up 0.6s 0.1s ease both;opacity:0;}
+  .phase-dot{
+    width:12px;height:12px;border-radius:50%;background:#ff1e1e;
+    margin:0 auto 8px;animation:pulse-red 1.5s ease-in-out infinite;
+  }
+  .phase-text{font-size:10px;letter-spacing:0.3em;color:#ff1e1e;animation:glow-red 2s ease-in-out infinite;}
+  .time-block{text-align:right;animation:float-up 0.6s 0.2s ease both;opacity:0;}
+  .time-big{font-size:24px;letter-spacing:0.15em;}
+  .time-date{font-size:9px;letter-spacing:0.2em;color:rgba(255,255,255,0.3);margin-top:4px;}
+
+  .nav{
+    display:flex;padding:0 32px;border-bottom:1px solid rgba(255,255,255,0.08);
+    animation:float-up 0.6s 0.3s ease both;opacity:0;
+  }
+  .nb{
+    padding:14px 18px;font-family:'Share Tech Mono',monospace;font-size:10px;
+    letter-spacing:0.2em;background:none;border:none;border-bottom:2px solid transparent;
+    color:rgba(255,255,255,0.25);cursor:pointer;transition:all 0.3s;margin-bottom:-1px;
+  }
+  .nb.on{color:#fff;border-bottom-color:#fff;}
+  .nb:hover{color:rgba(255,255,255,0.6);}
+
+  .main{flex:1;overflow-y:auto;padding:32px;}
+
+  .section{
+    margin-bottom:32px;
+    animation:float-up 0.5s ease both;opacity:0;
+  }
+  .s1{animation-delay:0.4s}
+  .s2{animation-delay:0.5s}
+  .s3{animation-delay:0.6s}
+  .s4{animation-delay:0.7s}
+  .s5{animation-delay:0.8s}
+
+  .section-label{
+    font-size:8px;letter-spacing:0.4em;color:rgba(255,255,255,0.25);
+    margin-bottom:20px;display:flex;align-items:center;gap:12px;
+  }
+  .section-label::after{
+    content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);
+  }
+
+  /* stat cards — large, spacious */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+  .stat{
+    padding:32px 24px;background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.07);
+    position:relative;overflow:hidden;
+    transition:border-color 0.3s;
+  }
+  .stat:hover{border-color:rgba(255,255,255,0.15);}
+  /* scan line animation on hover */
+  .stat::before{
+    content:'';position:absolute;left:0;right:0;height:1px;
+    background:rgba(255,255,255,0.08);
+    animation:scan 3s linear infinite;
+    pointer-events:none;
+  }
+  .stat-label{font-size:8px;letter-spacing:0.3em;color:rgba(255,255,255,0.3);margin-bottom:16px;}
+  .stat-value{font-size:44px;font-weight:400;line-height:1;color:#fff;letter-spacing:0.02em;}
+  .stat-value.red{color:#ff1e1e;animation:glow-red 3s ease-in-out infinite;}
+  .stat-value.green{color:#00ff50;animation:glow-green 3s ease-in-out infinite;}
+  .stat-sub{font-size:9px;color:rgba(255,255,255,0.25);margin-top:10px;letter-spacing:0.1em;}
+  .stat-indicator{
+    position:absolute;bottom:16px;right:16px;
+    width:8px;height:8px;border-radius:50%;
+  }
+  .ind-red{background:#ff1e1e;animation:pulse-red 1.5s ease-in-out infinite;}
+  .ind-green{background:#00ff50;animation:pulse-green 2s ease-in-out infinite;}
+
+  /* momentum — large and breathing */
+  .momentum-block{
+    padding:48px;border:1px solid rgba(255,255,255,0.07);
+    display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;
+    background:rgba(255,255,255,0.01);
+  }
+  .mom-num{font-size:120px;font-weight:400;line-height:1;color:#fff;letter-spacing:-0.02em;}
+  .mom-meta{}
+  .mom-label{font-size:8px;letter-spacing:0.4em;color:rgba(255,255,255,0.25);margin-bottom:16px;}
+  .mom-trend{font-size:28px;letter-spacing:0.1em;color:#00ff50;animation:glow-green 2s ease-in-out infinite;}
+  .mom-desc{font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;letter-spacing:0.05em;}
+  .bar-tracks{margin-top:24px;display:flex;flex-direction:column;gap:10px;}
+  .bt-row{display:flex;align-items:center;gap:16px;}
+  .bt-label{font-size:9px;color:rgba(255,255,255,0.3);width:80px;letter-spacing:0.1em;}
+  .bt-track{flex:1;height:2px;background:rgba(255,255,255,0.08);}
+  .bt-fill{
+    height:100%;background:#fff;
+    animation:slide-right 1s ease both;
+  }
+  .bt-fill.red-fill{background:#ff1e1e;}
+  .bt-val{font-size:10px;color:rgba(255,255,255,0.4);width:24px;text-align:right;}
+
+  /* two-col layout */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+
+  /* guard */
+  .guard-block{
+    padding:36px;border:1px solid rgba(255,30,30,0.2);
+    background:rgba(255,30,30,0.03);
+    position:relative;overflow:hidden;
+  }
+  .guard-scan{
+    position:absolute;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(255,30,30,0.4),transparent);
+    animation:scan 2.5s linear infinite;
+  }
+  .guard-title{font-size:9px;letter-spacing:0.35em;color:rgba(255,30,30,0.5);margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+  .guard-dot{width:6px;height:6px;border-radius:50%;background:#ff1e1e;animation:pulse-red 1.2s ease-in-out infinite;}
+  .guard-entry{
+    padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+    font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;
+    display:flex;gap:14px;animation:fade-in 0.5s ease both;
+  }
+  .guard-entry:nth-child(2){animation-delay:0.1s}
+  .guard-entry:last-child{border-bottom:none;}
+  .ge-arrow{color:#ff1e1e;font-size:10px;margin-top:3px;flex-shrink:0;}
+
+  /* actions */
+  .actions-block{padding:36px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.01);}
+  .actions-title{font-size:9px;letter-spacing:0.35em;color:rgba(255,255,255,0.25);margin-bottom:24px;}
+  .action-entry{
+    display:flex;align-items:flex-start;gap:20px;padding:20px 0;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    animation:fade-in 0.4s ease both;
+  }
+  .action-entry:nth-child(1){animation-delay:0.7s}
+  .action-entry:nth-child(2){animation-delay:0.8s}
+  .action-entry:nth-child(3){animation-delay:0.9s}
+  .action-entry:nth-child(4){animation-delay:1.0s}
+  .action-entry:last-child{border-bottom:none;}
+  .ae-dot{
+    width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;
+  }
+  .ae-dot.crit{background:#ff1e1e;animation:pulse-red 1.5s ease-in-out infinite;}
+  .ae-dot.high{background:#ff6600;animation:pulse-red 2s ease-in-out infinite;}
+  .ae-dot.ok{background:rgba(255,255,255,0.2);}
+  .ae-body{}
+  .ae-source{font-size:8px;letter-spacing:0.2em;color:rgba(255,255,255,0.25);margin-bottom:5px;}
+  .ae-text{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5;}
+
+  /* agents — large spacious grid */
+  .agents-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+  .agent{
+    padding:28px 20px;border:1px solid rgba(255,255,255,0.07);
+    display:flex;align-items:center;gap:16px;
+    background:rgba(255,255,255,0.01);
+    transition:background 0.3s,border-color 0.3s;
+    animation:float-up 0.4s ease both;opacity:0;
+  }
+  .agent:hover{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.15);}
+  .agent:nth-child(1){animation-delay:0.9s}
+  .agent:nth-child(2){animation-delay:1.0s}
+  .agent:nth-child(3){animation-delay:1.1s}
+  .agent:nth-child(4){animation-delay:1.2s}
+  .agent:nth-child(5){animation-delay:1.3s}
+  .agent:nth-child(6){animation-delay:1.4s}
+  .agent:nth-child(7){animation-delay:1.5s}
+  .agent:nth-child(8){animation-delay:1.6s}
+  .ag-indicator{
+    width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  }
+  .ag-info{}
+  .ag-name{font-size:10px;letter-spacing:0.15em;color:rgba(255,255,255,0.7);margin-bottom:4px;}
+  .ag-status{font-size:9px;letter-spacing:0.1em;}
+  .ag-status.ok{color:#00ff50;}
+  .ag-status.warn{color:#ff6600;}
+  .ag-status.crit{color:#ff1e1e;}
+  .ag-status.idle{color:rgba(255,255,255,0.2);}
+
+  .cmd{
+    padding:18px 32px;border-top:1px solid rgba(255,255,255,0.08);
+    display:flex;align-items:center;gap:12px;
+    animation:float-up 0.6s 0.9s ease both;opacity:0;
+  }
+  .cmd-p{color:rgba(255,255,255,0.4);font-size:16px;}
+  .cmd-i{
+    flex:1;background:none;border:none;outline:none;
+    color:#fff;font-family:'Share Tech Mono',monospace;font-size:13px;
+  }
+  .cmd-i::placeholder{color:rgba(255,255,255,0.15);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">LEGACY OS</div>
+    <div class="brand-sub">MULTI-AGENT OPERATING SYSTEM</div>
+  </div>
+  <div class="phase-wrap">
+    <div class="phase-dot"></div>
+    <div class="phase-text">SURVIVAL</div>
+  </div>
+  <div class="time-block">
+    <div class="time-big">03:55</div>
+    <div class="time-date">MON 05.18.2026</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on">HOME</button>
+  <button class="nb">FINANCE</button>
+  <button class="nb">NOIRE</button>
+  <button class="nb">BODY</button>
+  <button class="nb">AGENTS</button>
+  <button class="nb">LEGACY</button>
+</div>
+
+<div class="main">
+
+  <div class="section s1">
+    <div class="section-label">CASH SNAPSHOT</div>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-label">CASH ON HAND</div>
+        <div class="stat-value">$847</div>
+        <div class="stat-sub">current balance</div>
+        <div class="stat-indicator ind-green"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">RUNWAY</div>
+        <div class="stat-value red">14d</div>
+        <div class="stat-sub">days remaining</div>
+        <div class="stat-indicator ind-red"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">DAILY BURN</div>
+        <div class="stat-value">$62</div>
+        <div class="stat-sub">per day average</div>
+        <div class="stat-indicator ind-green"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">RISK LEVEL</div>
+        <div class="stat-value red" style="font-size:28px;padding-top:10px;">CRITICAL</div>
+        <div class="stat-sub">below 30 day floor</div>
+        <div class="stat-indicator ind-red"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section s2">
+    <div class="section-label">MOMENTUM</div>
+    <div class="momentum-block">
+      <div class="mom-num">68</div>
+      <div class="mom-meta">
+        <div class="mom-label">5-DAY ROLLING SCORE</div>
+        <div class="mom-trend">▲ RISING +12</div>
+        <div class="mom-desc">trending upward over the last five days</div>
+        <div class="bar-tracks">
+          <div class="bt-row">
+            <div class="bt-label">HEALTH</div>
+            <div class="bt-track"><div class="bt-fill" style="--w:80%;width:80%"></div></div>
+            <div class="bt-val">80</div>
+          </div>
+          <div class="bt-row">
+            <div class="bt-label">NOIRE</div>
+            <div class="bt-track"><div class="bt-fill" style="--w:55%;width:55%"></div></div>
+            <div class="bt-val">55</div>
+          </div>
+          <div class="bt-row">
+            <div class="bt-label">FINANCE</div>
+            <div class="bt-track"><div class="bt-fill red-fill" style="--w:40%;width:40%"></div></div>
+            <div class="bt-val" style="color:#ff1e1e">40</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section s3">
+    <div class="two-col">
+      <div class="guard-block">
+        <div class="guard-scan"></div>
+        <div class="guard-title"><div class="guard-dot"></div>REALITY GUARD — 2 FLAGS</div>
+        <div class="guard-entry"><span class="ge-arrow">▸</span>Runway at 14 days. The floor is 30. This is a cash emergency requiring immediate action.</div>
+        <div class="guard-entry"><span class="ge-arrow">▸</span>SURVIVAL phase active. Zero income streams running. Direct operational contradiction.</div>
+      </div>
+      <div class="actions-block">
+        <div class="actions-title">NEXT ACTIONS — AGENT QUEUE</div>
+        <div class="action-entry"><div class="ae-dot crit"></div><div class="ae-body"><div class="ae-source">CFO AGENT</div><div class="ae-text">Activate income stream — runway critical</div></div></div>
+        <div class="action-entry"><div class="ae-dot crit"></div><div class="ae-body"><div class="ae-source">NOIRE STRATEGIST</div><div class="ae-text">Send 10 DMs — 0 of 50 weekly</div></div></div>
+        <div class="action-entry"><div class="ae-dot high"></div><div class="ae-body"><div class="ae-source">OPERATOR</div><div class="ae-text">Log daily non-negs today</div></div></div>
+        <div class="action-entry"><div class="ae-dot ok"></div><div class="ae-body"><div class="ae-source">HEALTH</div><div class="ae-text">Log protein — 0g of 150g</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section s4">
+    <div class="section-label">AGENT BOARD</div>
+    <div class="agents-grid">
+      <div class="agent"><div class="ag-indicator" style="background:#ff1e1e;animation:pulse-red 1.2s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">CFO</div><div class="ag-status crit">CRITICAL</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:rgba(255,255,255,0.2)"></div><div class="ag-info"><div class="ag-name">OPERATOR</div><div class="ag-status idle">IDLE</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:#ff6600;animation:pulse-red 2s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">NOIRE</div><div class="ag-status warn">LOW VOLUME</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:#ff6600;animation:pulse-red 1.8s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">REALITY GUARD</div><div class="ag-status warn">2 FLAGS</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:#00ff50;animation:pulse-green 2s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">HEALTH</div><div class="ag-status ok">CLEAR</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:#00ff50;animation:pulse-green 2.5s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">INTELLIGENCE</div><div class="ag-status ok">WATCHING</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:rgba(255,255,255,0.2)"></div><div class="ag-info"><div class="ag-name">ARCHIVIST</div><div class="ag-status idle">STANDBY</div></div></div>
+      <div class="agent"><div class="ag-indicator" style="background:#00ff50;animation:pulse-green 3s ease-in-out infinite"></div><div class="ag-info"><div class="ag-name">LEGACY</div><div class="ag-status ok">ACTIVE</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmd">
+  <span class="cmd-p">›</span>
+  <input class="cmd-i" placeholder="command… press / to focus · ? for help" readonly>
+</div>
+
+</body>
+</html>
