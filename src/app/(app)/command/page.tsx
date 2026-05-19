@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import { motion } from 'framer-motion'
-import { AlertTriangle, TrendingUp, CheckCircle, Circle, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { AlertTriangle, TrendingUp, CheckCircle, Circle, ChevronRight, X } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { CrisisBanner } from '@/components/modules/CrisisMode'
@@ -11,8 +11,16 @@ import { OfflinePacket } from '@/components/modules/OfflinePacket'
 import { useDemoMode } from '@/lib/hooks/useDemoMode'
 import { useCrisisMode } from '@/lib/hooks/useCrisisMode'
 import { useOffline } from '@/lib/hooks/useOffline'
-import { formatCurrency, formatShortDate, formatRelativeTime } from '@/lib/utils/formatters'
+import { formatCurrency, formatRelativeTime } from '@/lib/utils/formatters'
 import { clsx } from 'clsx'
+
+const NON_NEGOTIABLES = [
+  { id: 'nn-money', label: 'Check the money', sub: 'Know your number every day' },
+  { id: 'nn-noire', label: 'Make a Noire move', sub: 'The brand never sleeps' },
+  { id: 'nn-legacy', label: 'Log to Legacy', sub: 'Document the journey in real time' },
+  { id: 'nn-body', label: 'Move the body', sub: 'Strength is infrastructure' },
+  { id: 'nn-family', label: 'Connect with family', sub: "Don't lose what you're building for" },
+]
 
 const EMOTIONAL_OPTIONS = [
   { value: 'calm', label: 'Calm', color: 'text-blue-400' },
@@ -22,23 +30,77 @@ const EMOTIONAL_OPTIONS = [
   { value: 'overwhelmed', label: 'Overwhelmed', color: 'text-crisis' },
 ]
 
+const AFFIRMATION = "I'm AMAZING, I'm UNSTOPPABLE and nothing can get in my way. I'm a LOVING and COMPASSIONATE being that is not led astray. I'm MIND, BODY and SPIRIT and careful with what I say. I'm WISE, WORTHY, WEALTHY and WORRY FREE for I've had a better day today than I did yesterday. I'm him. The Coldest MF Alive. Continue to Lead with Vigor, Act with Valor, and remain Victorious. God got me, My name's Eligah."
+
+const OPP_DETAILS: Record<string, { steps: string[]; scripts: string[]; timeline: string }> = {
+  default: {
+    steps: ['Research the opportunity thoroughly', 'Identify the right contact or entry point', 'Prepare a clear, concise pitch', 'Execute and follow up within 48 hours'],
+    scripts: [],
+    timeline: 'This week',
+  },
+}
+
+const MOVE_DETAILS: Record<number, { why: string; steps: string[]; accounts: string[]; scripts: string[]; deadline: string }> = {
+  1: {
+    why: 'This is the highest-leverage move available right now. Everything else depends on it.',
+    steps: ['Identify the immediate action required', 'Clear one obstacle before noon', 'Report progress at end of day'],
+    accounts: [],
+    scripts: [],
+    deadline: 'Today',
+  },
+  2: {
+    why: 'Second priority that compounds with move #1. Don\'t start this until Move 1 is in progress.',
+    steps: ['Define the specific outcome you need', 'Make the call or send the message', 'Document what happened'],
+    accounts: [],
+    scripts: [],
+    deadline: 'This week',
+  },
+  3: {
+    why: 'This sets up the following week. The payoff is 2–3 weeks out, but the groundwork starts today.',
+    steps: ['Map the full path to completion', 'Identify any blockers or dependencies', 'Schedule the first concrete step'],
+    accounts: [],
+    scripts: [],
+    deadline: 'This week',
+  },
+}
+
 export default function CommandPage() {
   const { demoData, store, getCurrentCash, completeReminder } = useDemoMode()
   const { isOffline, lastSynced, offlineData } = useOffline()
   const [emotionalState, setEmotionalState] = useState<string | null>(null)
+  const [checked, setChecked] = useState<string[]>([])
+  const [affirmationExpanded, setAffirmationExpanded] = useState(false)
+  const [selectedOpp, setSelectedOpp] = useState<typeof demoData.opportunities[0] | null>(null)
+  const [selectedMove, setSelectedMove] = useState<typeof demoData.nextMoves[0] | null>(null)
+
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const stored = localStorage.getItem(`nn-${today}`)
+    if (stored) {
+      try { setChecked(JSON.parse(stored)) } catch { setChecked([]) }
+    }
+  }, [])
+
+  const toggleNN = (id: string) => {
+    const today = new Date().toDateString()
+    setChecked(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      localStorage.setItem(`nn-${today}`, JSON.stringify(next))
+      return next
+    })
+  }
 
   const cashAmount = getCurrentCash()
   const bills = store.bills
   const reminders = store.reminders.filter(r => !r.completed)
 
-  const { isCrisis, reasons } = useCrisisMode({
-    cashAmount,
-    bills,
-  })
+  const { isCrisis, reasons } = useCrisisMode({ cashAmount, bills })
 
   const cashColor = cashAmount < 500 ? 'text-crisis' : cashAmount < 2000 ? 'text-yellow-400' : 'text-green-400'
   const totalObligations = bills.reduce((sum, b) => b.status !== 'paid' ? sum + b.amount : sum, 0)
   const survivalDays = totalObligations > 0 ? Math.floor(cashAmount / (totalObligations / 30)) : 999
+
+  const allDone = checked.length === NON_NEGOTIABLES.length
 
   return (
     <div>
@@ -92,7 +154,7 @@ export default function CommandPage() {
           </div>
         </Card>
 
-        {/* Threats Grid */}
+        {/* Active Threats */}
         {demoData.threats.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-crisis mb-2 flex items-center gap-1.5">
@@ -123,7 +185,47 @@ export default function CommandPage() {
           </div>
         )}
 
-        {/* Opportunities Grid */}
+        {/* 5 Non-Negotiables — below threats */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted flex items-center gap-1.5">
+              <CheckCircle size={10} />
+              5 Non-Negotiables
+            </p>
+            <p className={clsx('text-[10px] font-medium', allDone ? 'text-accent' : 'text-text-muted')}>
+              {checked.length}/5 {allDone ? '— Done' : ''}
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            {NON_NEGOTIABLES.map(nn => (
+              <button
+                key={nn.id}
+                onClick={() => toggleNN(nn.id)}
+                className={clsx(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all text-left',
+                  checked.includes(nn.id)
+                    ? 'border-accent/30 bg-accent/5'
+                    : 'border-border bg-surface'
+                )}
+              >
+                <div className={clsx(
+                  'w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all',
+                  checked.includes(nn.id) ? 'border-accent bg-accent' : 'border-border'
+                )}>
+                  {checked.includes(nn.id) && <CheckCircle size={11} className="text-[#020202]" />}
+                </div>
+                <div className="flex-1">
+                  <p className={clsx('text-sm transition-all', checked.includes(nn.id) ? 'text-text-muted line-through' : 'text-text-primary')}>
+                    {nn.label}
+                  </p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{nn.sub}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Opportunities */}
         {demoData.opportunities.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-accent mb-2 flex items-center gap-1.5">
@@ -132,22 +234,22 @@ export default function CommandPage() {
             </p>
             <div className="space-y-2">
               {demoData.opportunities.map(opp => (
-                <motion.div
+                <motion.button
                   key={opp.id}
+                  onClick={() => setSelectedOpp(opp)}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="bg-surface border border-accent/25 rounded-lg p-3 flex items-center justify-between"
+                  className="w-full bg-surface border border-accent/25 rounded-lg p-3 flex items-center justify-between text-left hover:border-accent/40 transition-colors"
                 >
                   <div>
                     <p className="text-sm text-text-primary font-medium">{opp.title}</p>
                     <p className="text-xs text-text-secondary mt-0.5">{opp.description}</p>
                   </div>
-                  {opp.amount && (
-                    <p className="text-accent font-medium text-sm ml-3 flex-shrink-0">
-                      {formatCurrency(opp.amount)}
-                    </p>
-                  )}
-                </motion.div>
+                  <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                    {opp.amount && <p className="text-accent font-medium text-sm">{formatCurrency(opp.amount)}</p>}
+                    <ChevronRight size={12} className="text-text-muted" />
+                  </div>
+                </motion.button>
               ))}
             </div>
           </div>
@@ -158,23 +260,116 @@ export default function CommandPage() {
           <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Next Moves</p>
           <div className="space-y-2">
             {demoData.nextMoves.map(move => (
-              <Card key={move.order} variant="default" className="p-3">
+              <button
+                key={move.order}
+                onClick={() => setSelectedMove(move)}
+                className="w-full bg-surface border border-border rounded-lg p-3 text-left hover:border-border transition-colors"
+              >
                 <div className="flex items-start gap-3">
                   <span className="text-accent font-serif text-lg leading-none mt-0.5 flex-shrink-0">
                     {move.order}
                   </span>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm text-text-primary font-medium">{move.title}</p>
                     <p className="text-xs text-text-secondary mt-0.5">{move.description}</p>
                   </div>
-                  <ChevronRight size={14} className="text-text-muted ml-auto flex-shrink-0 mt-0.5" />
+                  <ChevronRight size={14} className="text-text-muted flex-shrink-0 mt-0.5" />
                 </div>
-              </Card>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Today's Reminders */}
+        {/* Opportunity Modal */}
+        <AnimatePresence>
+          {selectedOpp && (
+            <div className="fixed inset-0 z-50 flex items-end" onClick={() => setSelectedOpp(null)}>
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                onClick={e => e.stopPropagation()}
+                className="w-full bg-surface border-t border-border rounded-t-2xl p-6 space-y-4 max-h-[75vh] overflow-y-auto"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-accent mb-1">Opportunity</p>
+                    <p className="text-lg font-medium text-text-primary">{selectedOpp.title}</p>
+                    {selectedOpp.amount && <p className="text-accent font-medium mt-1">{formatCurrency(selectedOpp.amount)}</p>}
+                  </div>
+                  <button onClick={() => setSelectedOpp(null)} className="text-text-muted hover:text-text-primary transition-colors">
+                    <X size={16} />
+                  </button>
+                </div>
+                <p className="text-sm text-text-secondary leading-relaxed">{selectedOpp.description}</p>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Action Steps</p>
+                  <div className="space-y-1.5">
+                    {(OPP_DETAILS.default.steps).map((step, i) => (
+                      <p key={i} className="text-xs text-text-secondary flex items-start gap-2">
+                        <span className="text-accent flex-shrink-0">{i + 1}.</span>{step}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-surface-2 rounded-lg p-3 border border-border">
+                  <p className="text-[9px] uppercase tracking-wider text-text-muted mb-1">Timeline</p>
+                  <p className="text-xs text-text-primary">This week — don't let this slip past 72 hours</p>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Next Move Modal */}
+        <AnimatePresence>
+          {selectedMove && (
+            <div className="fixed inset-0 z-50 flex items-end" onClick={() => setSelectedMove(null)}>
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                onClick={e => e.stopPropagation()}
+                className="w-full bg-surface border-t border-border rounded-t-2xl p-6 space-y-4 max-h-[75vh] overflow-y-auto"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-text-muted mb-1">Move {selectedMove.order}</p>
+                    <p className="text-lg font-medium text-text-primary">{selectedMove.title}</p>
+                  </div>
+                  <button onClick={() => setSelectedMove(null)} className="text-text-muted hover:text-text-primary transition-colors">
+                    <X size={16} />
+                  </button>
+                </div>
+                <p className="text-sm text-text-secondary leading-relaxed">{selectedMove.description}</p>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Why This, Why Now</p>
+                  <p className="text-xs text-text-secondary leading-relaxed border-l-2 border-accent/30 pl-3">
+                    {MOVE_DETAILS[selectedMove.order]?.why || 'This move is essential to momentum. Complete it before moving to the next.'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Steps to Completion</p>
+                  <div className="space-y-1.5">
+                    {(MOVE_DETAILS[selectedMove.order]?.steps || MOVE_DETAILS[1].steps).map((step, i) => (
+                      <p key={i} className="text-xs text-text-secondary flex items-start gap-2">
+                        <span className="text-accent flex-shrink-0">{i + 1}.</span>{step}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-surface-2 rounded-lg p-3 border border-border">
+                  <p className="text-[9px] uppercase tracking-wider text-text-muted mb-1">Deadline</p>
+                  <p className="text-xs text-accent font-medium">{MOVE_DETAILS[selectedMove.order]?.deadline || 'This week'}</p>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Reminders */}
         {reminders.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Reminders</p>
@@ -212,7 +407,7 @@ export default function CommandPage() {
                   'px-3 py-1.5 rounded-lg border text-sm transition-all duration-150',
                   emotionalState === opt.value
                     ? 'border-accent/60 bg-accent/10 text-accent'
-                    : 'border-border text-text-muted hover:border-border hover:text-text-secondary'
+                    : 'border-border text-text-muted hover:text-text-secondary'
                 )}
               >
                 {opt.label}
@@ -226,24 +421,29 @@ export default function CommandPage() {
           )}
         </div>
 
-        {/* AI Recommendations */}
+        {/* Daily Affirmation */}
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">AI Analysis</p>
-          <Card variant="glass" className="p-4">
-            <p className="text-text-muted text-sm italic">
-              AI insights will appear here once configured. In live mode, the system will analyze patterns and surface actionable intelligence.
+          <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Daily Affirmation</p>
+          <button
+            onClick={() => setAffirmationExpanded(!affirmationExpanded)}
+            className="w-full bg-surface border border-accent/15 rounded-xl p-5 text-left hover:border-accent/30 transition-colors"
+          >
+            <p className={clsx(
+              'text-sm text-text-secondary leading-relaxed italic transition-all',
+              !affirmationExpanded && 'line-clamp-3'
+            )}>
+              "{AFFIRMATION}"
             </p>
-          </Card>
+            <p className="text-[10px] text-accent mt-3 uppercase tracking-wider">
+              {affirmationExpanded ? 'Close' : 'Read full'}
+            </p>
+          </button>
         </div>
 
         {/* Offline Packet */}
         <div>
           <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Survival Packet</p>
-          <OfflinePacket
-            offlineData={offlineData}
-            isOffline={isOffline}
-            lastSynced={lastSynced}
-          />
+          <OfflinePacket offlineData={offlineData} isOffline={isOffline} lastSynced={lastSynced} />
         </div>
       </div>
     </div>
