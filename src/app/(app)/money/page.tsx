@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Zap } from 'lucide-react'
+import { Plus, Zap, TrendingUp, Shield, BarChart2, Bitcoin } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Modal } from '@/components/ui/Modal'
@@ -108,6 +108,37 @@ const VISION_LINES = [
   'Real-life Bruce Wayne meets Tony Stark — but without their limitations.',
 ]
 
+const MONEY_AGENTS = [
+  {
+    code: 'Crypto', color: '#facc15', dept: 'Crypto Portfolio', pulse: true,
+    Icon: Bitcoin,
+    status: 'BTC DCA queued for Monday — portfolio up 4.2% this week',
+    detail: 'Manages BTC and ETH positions. Dollar-cost averaging weekly. Stop-loss orders active. Monitors altcoin opportunities.',
+    stats: [{ label: 'Strategy', value: 'DCA + Hold' }, { label: 'Allocation', value: '15% of portfolio' }, { label: 'Risk', value: 'Medium' }],
+  },
+  {
+    code: 'Stocks', color: '#4ade80', dept: 'Equity Portfolio', pulse: false,
+    Icon: TrendingUp,
+    status: 'Index core stable — rebalancing scheduled Q3 2026',
+    detail: 'Index fund core (70%), dividend stocks (20%), growth positions (10%). Automated rebalancing. Dividend reinvestment active.',
+    stats: [{ label: 'Core', value: 'S&P 500 Index' }, { label: 'Yield', value: '2.3% dividend' }, { label: 'Risk', value: 'Low-Medium' }],
+  },
+  {
+    code: 'Assets', color: '#d4af7a', dept: 'Asset Management', pulse: true,
+    Icon: BarChart2,
+    status: 'Net worth tracking active — next property goal: $85k down',
+    detail: 'Full asset tracking across cash, crypto, stocks, Noire inventory, and future real estate. Net worth dashboard. Projection modeling.',
+    stats: [{ label: 'Total Assets', value: 'Tracking' }, { label: 'Goal', value: 'Own property' }, { label: 'Timeline', value: '3–5 years' }],
+  },
+  {
+    code: 'Shield', color: '#f472b6', dept: 'Protection', pulse: false,
+    Icon: Shield,
+    status: 'Emergency fund at 12% of target — auto-save plan active',
+    detail: 'Emergency fund ($10k target). Insurance optimization. LLC formation for asset protection. Debt elimination sequencing.',
+    stats: [{ label: 'E-Fund Target', value: '$10,000' }, { label: 'Progress', value: '12%' }, { label: 'Priority', value: 'High' }],
+  },
+]
+
 const WEALTH_MILESTONES = [
   'First $10k month',
   'Car with zero payment anxiety',
@@ -123,7 +154,8 @@ const WEALTH_MILESTONES = [
 
 export default function MoneyPage() {
   const { store, getCurrentCash, addBill, addDebt, addCashUpdate, demoData } = useDemoMode()
-  const [activeTab, setActiveTab] = useState<'overview' | 'bills' | 'income' | 'assistance' | 'vision'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'bills' | 'income' | 'assistance' | 'agents' | 'vision'>('overview')
+  const [selectedAgent, setSelectedAgent] = useState<typeof MONEY_AGENTS[0] | null>(null)
   const [addModal, setAddModal] = useState<'bill' | 'debt' | 'cash' | 'income' | 'application' | 'assistance' | null>(null)
   const [incomeSources, setIncomeSources] = useState(demoData.incomeSources)
   const [assistancePrograms, setAssistancePrograms] = useState(demoData.assistancePrograms)
@@ -179,7 +211,7 @@ export default function MoneyPage() {
 
       {/* Tabs */}
       <div className="flex overflow-x-auto scrollbar-none gap-1 bg-surface-2 rounded-lg p-1">
-        {(['overview', 'bills', 'income', 'assistance', 'vision'] as const).map(tab => (
+        {(['overview', 'bills', 'income', 'assistance', 'agents', 'vision'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -403,6 +435,42 @@ export default function MoneyPage() {
         </div>
       )}
 
+      {/* Agents */}
+      {activeTab === 'agents' && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-1">AI Wealth Agents</p>
+            <p className="text-xs text-text-muted mb-4">Autonomous agents managing every layer of your financial life. Tap to brief.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {MONEY_AGENTS.map(agent => {
+              const AgentIcon = agent.Icon
+              return (
+                <button
+                  key={agent.code}
+                  onClick={() => setSelectedAgent(agent)}
+                  className="bg-surface border border-[#1c1c1c] rounded-xl p-4 text-left hover:border-[#2a2a2a] transition-colors relative"
+                >
+                  {agent.pulse && (
+                    <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  )}
+                  <AgentIcon size={18} style={{ color: agent.color }} className="mb-2" />
+                  <p className="text-sm font-medium" style={{ color: agent.color }}>{agent.code}</p>
+                  <p className="text-[9px] text-text-muted uppercase tracking-wider mt-0.5">{agent.dept}</p>
+                  <p className="text-[10px] text-text-muted mt-2 leading-relaxed line-clamp-2">{agent.status}</p>
+                </button>
+              )
+            })}
+          </div>
+          <div className="bg-surface border border-accent/10 rounded-xl p-4">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Collective Status</p>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              All agents operating in concert. Crypto averaging in. Stocks holding. Assets tracked. Shield monitoring liquidity. No action required — agents will surface opportunities and risks as they emerge.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Vision */}
       {activeTab === 'vision' && (
         <div className="space-y-6">
@@ -517,6 +585,30 @@ export default function MoneyPage() {
           setApplications(prev => [...prev, { id: `app-${Date.now()}`, company: String(data.company), role: String(data.role), status: String(data.status || 'applied'), applied_date: data.applied_date ? String(data.applied_date) : undefined, salary_range: data.salary_range ? String(data.salary_range) : undefined, note: data.note ? String(data.note) : undefined }])
           setAddModal(null)
         }} onCancel={() => setAddModal(null)} submitLabel="Track Application" />
+      </Modal>
+
+      <Modal isOpen={!!selectedAgent} onClose={() => setSelectedAgent(null)} title={selectedAgent ? `${selectedAgent.code} — ${selectedAgent.dept}` : ''}>
+        {selectedAgent && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <selectedAgent.Icon size={28} style={{ color: selectedAgent.color }} />
+              <div>
+                <p className="text-lg font-medium" style={{ color: selectedAgent.color }}>{selectedAgent.code}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">{selectedAgent.dept}</p>
+              </div>
+              <span className={clsx('ml-auto w-2 h-2 rounded-full', selectedAgent.pulse ? 'bg-green-400 animate-pulse' : 'bg-text-muted')} />
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">{selectedAgent.detail}</p>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+              {selectedAgent.stats.map(s => (
+                <div key={s.label} className="bg-surface-2 rounded-lg p-2.5 text-center">
+                  <p className="text-[9px] text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
+                  <p className="text-xs text-text-primary font-medium">{s.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Modal>
 
       <Modal isOpen={addModal === 'assistance'} onClose={() => setAddModal(null)} title="Add Assistance Program">

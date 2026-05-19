@@ -39,6 +39,8 @@ const MUSIC_TRACKS = [
   { id: 'mt-3', title: 'Emergence', mood: 'Victory / Ascension', influences: 'Drake × Travis Scott energy', status: 'concept', duration: '—' },
 ]
 
+const AFFIRMATION = "I'm AMAZING, I'm UNSTOPPABLE and nothing can get in my way. I'm a LOVING and COMPASSIONATE being that is not led astray. I'm MIND, BODY and SPIRIT and careful with what I say. I'm WISE, WORTHY, WEALTHY and WORRY FREE for I've had a better day today than I did yesterday. I'm him. The Coldest MF Alive. Continue to Lead with Vigor, Act with Valor, and remain Victorious. God got me, My name's Eligah."
+
 const DAILY_PROMPTS = {
   morning: [
     'What does today need to look like for you to be proud of it at midnight?',
@@ -77,6 +79,7 @@ const ENTRY_FIELDS: FormField[] = [
 export default function LegacyPage() {
   const [entries, setEntries] = useState(DEMO_ENTRIES)
   const [activeTab, setActiveTab] = useState<'daily' | 'archive' | 'pipeline' | 'music'>('daily')
+  const [affirmExpanded, setAffirmExpanded] = useState(false)
   const [addModal, setAddModal] = useState(false)
   const [selected, setSelected] = useState<typeof DEMO_ENTRIES[0] | null>(null)
   const [promptType, setPromptType] = useState<'morning' | 'evening'>('morning')
@@ -150,6 +153,22 @@ export default function LegacyPage() {
                 <Plus size={12} />Respond to this prompt
               </button>
             </div>
+          </div>
+
+          {/* Daily Affirmation */}
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Daily Affirmation</p>
+            <button
+              onClick={() => setAffirmExpanded(!affirmExpanded)}
+              className="w-full bg-surface border border-accent/15 rounded-xl p-5 text-left hover:border-accent/30 transition-colors"
+            >
+              <p className={clsx('text-sm text-text-secondary leading-relaxed italic transition-all', !affirmExpanded && 'line-clamp-3')}>
+                "{AFFIRMATION}"
+              </p>
+              <p className="text-[10px] text-accent mt-3 uppercase tracking-wider">
+                {affirmExpanded ? 'Close' : 'Read full'}
+              </p>
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-2">

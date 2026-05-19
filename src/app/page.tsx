@@ -83,33 +83,27 @@ export default function SplashPage() {
           )}
         </AnimatePresence>
 
-        {/* LEGACY OS */}
+        {/* LEGACY OS + Family line */}
         <AnimatePresence>
           {phase >= 2 && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center gap-3"
+              className="flex flex-col items-end gap-2"
             >
               <h1 className="text-4xl font-light tracking-[0.35em] text-[#f0ede8] uppercase">
                 LEGACY OS
               </h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.32 }}
+                transition={{ duration: 1.4, delay: 0.6 }}
+                className="text-[9px] tracking-[0.28em] text-[#666] uppercase"
+              >
+                A Lewis Family Product
+              </motion.p>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Brand line */}
-        <AnimatePresence>
-          {phase >= 3 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ duration: 1 }}
-              className="text-xs tracking-[0.3em] text-[#888888] uppercase mt-2"
-            >
-              A Lewis Family Product • MMXXVI
-            </motion.p>
           )}
         </AnimatePresence>
       </div>

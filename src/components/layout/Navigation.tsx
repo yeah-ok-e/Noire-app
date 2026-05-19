@@ -10,7 +10,6 @@ import {
   Heart,
   Calendar,
   BookOpen,
-  Settings,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -22,7 +21,6 @@ const navItems = [
   { label: 'Body', href: '/body', Icon: Heart },
   { label: 'Calendar', href: '/calendar', Icon: Calendar },
   { label: 'Legacy', href: '/legacy', Icon: BookOpen },
-  { label: 'Admin', href: '/admin', Icon: Settings },
 ]
 
 export function Navigation() {
@@ -30,7 +28,7 @@ export function Navigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border pb-safe">
-      <div className="flex items-center justify-start overflow-x-auto scrollbar-none px-1">
+      <div className="flex items-center justify-around px-1">
         {navItems.map(({ label, href, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
@@ -38,8 +36,8 @@ export function Navigation() {
               key={href}
               href={href}
               className={clsx(
-                'flex flex-col items-center justify-center gap-1 min-w-[60px] py-2.5 px-1.5',
-                'transition-colors duration-200 relative flex-shrink-0',
+                'flex flex-col items-center justify-center gap-1 flex-1 py-2.5 px-1',
+                'transition-colors duration-200 relative min-w-0',
                 isActive ? 'text-accent' : 'text-text-muted hover:text-text-secondary'
               )}
             >

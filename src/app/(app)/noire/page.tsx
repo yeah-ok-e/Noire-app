@@ -2,6 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
+
+function NoireLogoMark({ size = 52, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 52 52" fill="none" className={className}>
+      {/* Corner brackets */}
+      <path d="M2 14V2H14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M38 2H50V14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 38V50H14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M38 50H50V38" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* N letterform */}
+      <path d="M16 36V16L36 36V16" stroke="#f0ede8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -120,9 +134,16 @@ export default function NoirePage() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6"
             style={{ background: '#020202' }}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <NoireLogoMark size={64} />
+            </motion.div>
             <motion.h1
               initial={{ opacity: 0, letterSpacing: '0.05em' }}
               animate={{ opacity: 1, letterSpacing: '0.55em' }}
@@ -133,9 +154,9 @@ export default function NoirePage() {
             </motion.h1>
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: '100px' }}
+              animate={{ width: '80px' }}
               transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
-              className="h-px bg-[#d4af7a] mt-5"
+              className="h-px bg-[#d4af7a]"
             />
             <motion.p
               initial={{ opacity: 0, y: 6 }}
@@ -160,7 +181,10 @@ export default function NoirePage() {
         <div className="flex items-end justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-[0.5em] text-[#d4af7a]/60 mb-2">Identity Architecture</p>
-            <h1 className="text-3xl font-light tracking-[0.3em] text-[#f0ede8] uppercase">NOIRE</h1>
+            <div className="flex items-center gap-3">
+              <NoireLogoMark size={36} />
+              <h1 className="text-3xl font-light tracking-[0.3em] text-[#f0ede8] uppercase">NOIRE</h1>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-[10px] text-[#444] uppercase tracking-widest">Season</p>

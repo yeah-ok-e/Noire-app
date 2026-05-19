@@ -5,7 +5,7 @@ import {
   format, addDays, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, isSameDay, isSameMonth, isToday, getDay, parseISO,
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Compass } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Compass, CheckSquare, Square } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Modal } from '@/components/ui/Modal'
 import { QuickAddForm } from '@/components/ui/QuickAddForm'
@@ -33,6 +33,62 @@ const SUGGESTED_EXPERIENCES = [
   { title: 'Keynote / Lecture Series', category: 'Growth', note: 'Learn from people who built what you\'re building. Every room is a curriculum.', frequency: 'As available', icon: '◆' },
   { title: 'Noire Pop-up Event', category: 'Brand', note: 'Performance art meets retail. Every pop-up is a cultural moment, not a transaction.', frequency: 'Seasonal', icon: '◆' },
 ]
+
+const KIDS_SCHEDULE = [
+  { id: 'ks1', title: 'Trampoline Park', category: 'Active' },
+  { id: 'ks2', title: 'Escape Room', category: 'Experience' },
+  { id: 'ks3', title: 'Dave & Busters', category: 'Experience' },
+  { id: 'ks4', title: 'Urban Air', category: 'Active' },
+  { id: 'ks5', title: 'Rock Climbing', category: 'Active' },
+  { id: 'ks6', title: 'K1 Indoor Karts', category: 'Active' },
+  { id: 'ks7', title: 'Skating', category: 'Active' },
+  { id: 'ks8', title: 'Basketball', category: 'Active' },
+  { id: 'ks9', title: 'Bowling / Scene75', category: 'Active' },
+  { id: 'ks10', title: 'Arts & Crafts Day', category: 'Creative' },
+  { id: 'ks11', title: 'Cook New Foods Together', category: 'Creative' },
+  { id: 'ks12', title: 'Outdoor Movie / Drive-In', category: 'Culture' },
+  { id: 'ks13', title: 'WNDR Museum', category: 'Culture' },
+  { id: 'ks14', title: 'Candlelight Concert', category: 'Culture' },
+  { id: 'ks15', title: 'Planetarium', category: 'Culture' },
+  { id: 'ks16', title: 'Magic Show / Illusionist', category: 'Culture' },
+  { id: 'ks17', title: 'Concerts — Drake & Fridayy', category: 'Culture' },
+  { id: 'ks18', title: 'Movies', category: 'Culture' },
+  { id: 'ks19', title: 'Camping', category: 'Outdoors' },
+  { id: 'ks20', title: 'Fishing', category: 'Outdoors' },
+  { id: 'ks21', title: 'Night Fishing', category: 'Outdoors' },
+  { id: 'ks22', title: 'Kites — Pontiac Kite Shop', category: 'Outdoors' },
+  { id: 'ks23', title: 'Starved Rock', category: 'Outdoors' },
+  { id: 'ks24', title: 'Camlara Park', category: 'Outdoors' },
+  { id: 'ks25', title: 'Funks Grove', category: 'Outdoors' },
+  { id: 'ks26', title: 'Dawson', category: 'Outdoors' },
+  { id: 'ks27', title: 'Night Drive', category: 'Outdoors' },
+  { id: 'ks28', title: 'Horse Back Riding', category: 'Outdoors' },
+  { id: 'ks29', title: 'Skydiving', category: 'Adventure' },
+  { id: 'ks30', title: 'Zip Line', category: 'Adventure' },
+  { id: 'ks31', title: 'Cliff Dive', category: 'Adventure' },
+  { id: 'ks32', title: 'Parasailing', category: 'Adventure' },
+  { id: 'ks33', title: 'Hang Gliding', category: 'Adventure' },
+  { id: 'ks34', title: 'River Rafting', category: 'Adventure' },
+  { id: 'ks35', title: 'Swim with Sharks', category: 'Adventure' },
+  { id: 'ks36', title: 'Deep Scuba Dive', category: 'Adventure' },
+  { id: 'ks37', title: 'NASCAR Track Day', category: 'Adventure' },
+  { id: 'ks38', title: 'Track Days', category: 'Adventure' },
+  { id: 'ks39', title: 'Snowboarding / Skiing', category: 'Adventure' },
+  { id: 'ks40', title: 'Hawaii', category: 'Travel' },
+  { id: 'ks41', title: 'Airbnb Getaway', category: 'Travel' },
+  { id: 'ks42', title: 'Six Flags', category: 'Travel' },
+  { id: 'ks43', title: 'Everest', category: 'Travel' },
+  { id: 'ks44', title: "Grady's", category: 'Travel' },
+  { id: 'ks45', title: 'Boxing / Muay Thai', category: 'Learning' },
+  { id: 'ks46', title: 'Read Robert Greene Books', category: 'Learning' },
+  { id: 'ks47', title: 'Music Room Session', category: 'Learning' },
+  { id: 'ks48', title: 'Haunted House', category: 'Experience' },
+  { id: 'ks49', title: 'Random Spree', category: 'Experience' },
+  { id: 'ks50', title: 'Year End Wrap-Up Video', category: 'Legacy' },
+  { id: 'ks51', title: 'Iron Coyote', category: 'Experience' },
+]
+
+const KIDS_CATEGORIES = ['Active', 'Adventure', 'Travel', 'Outdoors', 'Culture', 'Creative', 'Experience', 'Learning', 'Legacy']
 
 const CATEGORY_COLORS: Record<string, string> = {
   income: 'border-[#d4af7a]/40 bg-[#d4af7a]/10',
@@ -64,6 +120,16 @@ export default function CalendarPage() {
   const [events, setEvents] = useState(DEMO_EVENTS)
   const [addModal, setAddModal] = useState(false)
   const [view, setView] = useState<'month' | 'agenda'>('month')
+  const [kidsFilter, setKidsFilter] = useState<string | null>(null)
+  const [doneKids, setDoneKids] = useState<string[]>([])
+
+  const toggleKidsDone = (id: string) => {
+    setDoneKids(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  const filteredKids = kidsFilter
+    ? KIDS_SCHEDULE.filter(k => k.category === kidsFilter)
+    : KIDS_SCHEDULE
 
   const monthDays = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) })
   const firstDayOfMonth = getDay(startOfMonth(currentMonth))
@@ -224,6 +290,48 @@ export default function CalendarPage() {
               <p className="text-xs text-text-secondary">{item.label}</p>
               <p className="text-[10px] text-text-muted">{item.frequency}</p>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Kids Bucket List */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">Kids Bucket List</p>
+          <p className="text-[10px] text-accent">{doneKids.length}/{KIDS_SCHEDULE.length} done</p>
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-2 mb-3">
+          <button
+            onClick={() => setKidsFilter(null)}
+            className={clsx('flex-shrink-0 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-wider border transition-all', !kidsFilter ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted')}
+          >All</button>
+          {KIDS_CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setKidsFilter(kidsFilter === cat ? null : cat)}
+              className={clsx('flex-shrink-0 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-wider border transition-all', kidsFilter === cat ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted')}
+            >{cat}</button>
+          ))}
+        </div>
+        <div className="space-y-1.5">
+          {filteredKids.map(item => (
+            <button
+              key={item.id}
+              onClick={() => toggleKidsDone(item.id)}
+              className={clsx(
+                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all text-left',
+                doneKids.includes(item.id) ? 'border-accent/20 bg-accent/5' : 'border-border bg-surface'
+              )}
+            >
+              {doneKids.includes(item.id)
+                ? <CheckSquare size={13} className="text-accent flex-shrink-0" />
+                : <Square size={13} className="text-text-muted flex-shrink-0" />
+              }
+              <p className={clsx('text-sm flex-1', doneKids.includes(item.id) ? 'text-text-muted line-through' : 'text-text-primary')}>
+                {item.title}
+              </p>
+              <span className="text-[9px] text-text-muted flex-shrink-0">{item.category}</span>
+            </button>
           ))}
         </div>
       </div>

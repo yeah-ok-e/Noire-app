@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Home, Users, Heart, Zap } from 'lucide-react'
+import { Plus, Home, Users, Heart, Zap, Shield, CheckSquare, Square } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -24,7 +24,6 @@ const RELATIONSHIP_AGENTS = [
       { label: 'Share a win — no matter how small', frequency: 'Ongoing' },
     ],
     notes: 'Covered phone bill — $60 owed. Emergency contact. Core support.',
-    sharedWith: ['Your journey', 'Family'],
   },
   {
     id: 'rel-2', name: 'Dana', type: 'Friend', accessLevel: 'Inner Circle',
@@ -36,7 +35,6 @@ const RELATIONSHIP_AGENTS = [
       { label: 'In-person catch-up', frequency: 'Monthly' },
     ],
     notes: 'Personal loan — $100 owed. Trusted friend. Genuine support.',
-    sharedWith: ['Support', 'History'],
   },
   {
     id: 'rel-3', name: 'Reggie', type: 'Friend', accessLevel: 'Inner Circle',
@@ -48,23 +46,96 @@ const RELATIONSHIP_AGENTS = [
       { label: 'Share a win when it happens', frequency: 'As available' },
     ],
     notes: 'Personal loan — $100 owed. Real one. Values authenticity.',
-    sharedWith: ['Hustle', 'Authenticity'],
   },
+]
+
+const PROTECTION_AGENTS = [
+  {
+    id: 'pa-1', code: 'Insurance', color: '#4ade80', dept: 'Life Insurance', pulse: true,
+    status: '$1M term life policy recommended — research in progress',
+    detail: 'Managing life insurance strategy. $1M term life policy is the minimum standard. Beneficiaries: the kids. Policy comparison active across top carriers. Monthly premium estimate: ~$45–80.',
+    priority: 'Activate within 90 days',
+  },
+  {
+    id: 'pa-2', code: 'Will', color: '#d4af7a', dept: 'Will & Estate', pulse: true,
+    status: 'Will framework drafted — awaiting legal execution',
+    detail: 'Will framework covers: asset distribution, Noire business succession, guardianship designations for the kids, property transfer, and final instructions. Needs legal execution to become binding.',
+    priority: 'Complete within 60 days',
+  },
+  {
+    id: 'pa-3', code: 'Eternal', color: '#a78bfa', dept: 'Life After Death', pulse: false,
+    status: 'Digital legacy system active — milestone messages queued',
+    detail: 'Letters to the children for: graduation, marriage, first business launch, darkest day, and every birthday through age 30. Business succession plan. Noire transition roadmap. Property and financial instructions.',
+    priority: 'Build continuously',
+  },
+  {
+    id: 'pa-4', code: 'Alfred', color: '#f0ede8', dept: "Children's Guardian AI", pulse: false,
+    status: 'Standby — activates upon verified trigger event',
+    detail: 'Alfred is the guardian AI system for the children once you\'re gone. Contains everything: your life lessons, financial guidance, business principles, letters from dad, memories, rules for wealth, and specific instructions for every major life milestone. He speaks in your voice. He carries your values.',
+    priority: 'Begin building now',
+  },
+]
+
+const KIDS_BUCKET_LIST = [
+  { id: 'k1', title: 'Iron Coyote', category: 'Experience' },
+  { id: 'k2', title: 'Trampoline Park', category: 'Active' },
+  { id: 'k3', title: 'Snowboarding / Skiing', category: 'Adventure' },
+  { id: 'k4', title: 'Hawaii', category: 'Travel' },
+  { id: 'k5', title: 'Boxing / Muay Thai', category: 'Active' },
+  { id: 'k6', title: 'Random Spree', category: 'Experience' },
+  { id: 'k7', title: 'Haunted House', category: 'Experience' },
+  { id: 'k8', title: 'Fishing', category: 'Outdoors' },
+  { id: 'k9', title: 'Camping', category: 'Outdoors' },
+  { id: 'k10', title: 'Kites — Pontiac Kite Shop', category: 'Outdoors' },
+  { id: 'k11', title: 'Skydiving', category: 'Adventure' },
+  { id: 'k12', title: 'Read Robert Greene Books', category: 'Learning' },
+  { id: 'k13', title: 'Music Room Session', category: 'Creative' },
+  { id: 'k14', title: 'Planetarium', category: 'Culture' },
+  { id: 'k15', title: 'Concerts', category: 'Culture' },
+  { id: 'k16', title: 'Escape Room', category: 'Experience' },
+  { id: 'k17', title: 'Movies', category: 'Experience' },
+  { id: 'k18', title: 'Cook New Foods Together', category: 'Experience' },
+  { id: 'k19', title: 'Six Flags', category: 'Active' },
+  { id: 'k20', title: 'Track Days', category: 'Adventure' },
+  { id: 'k21', title: 'Scene75', category: 'Active' },
+  { id: 'k22', title: 'Basketball', category: 'Active' },
+  { id: 'k23', title: 'Year End Wrap-Up Video', category: 'Legacy' },
+  { id: 'k24', title: 'Urban Air', category: 'Active' },
+  { id: 'k25', title: "Grady's", category: 'Experience' },
+  { id: 'k26', title: 'Rock Climbing', category: 'Active' },
+  { id: 'k27', title: 'Arts & Crafts', category: 'Creative' },
+  { id: 'k28', title: 'Dave & Busters', category: 'Experience' },
+  { id: 'k29', title: 'WNDR Museum', category: 'Culture' },
+  { id: 'k30', title: 'Candlelight Concert', category: 'Culture' },
+  { id: 'k31', title: 'Funks Grove', category: 'Outdoors' },
+  { id: 'k32', title: 'Dawson', category: 'Outdoors' },
+  { id: 'k33', title: 'Camlara Park', category: 'Outdoors' },
+  { id: 'k34', title: 'Starved Rock', category: 'Outdoors' },
+  { id: 'k35', title: 'Parasailing', category: 'Adventure' },
+  { id: 'k36', title: 'Hang Gliding', category: 'Adventure' },
+  { id: 'k37', title: 'Cliff Dive', category: 'Adventure' },
+  { id: 'k38', title: 'Deep Scuba Dive', category: 'Adventure' },
+  { id: 'k39', title: 'NASCAR Track Day', category: 'Adventure' },
+  { id: 'k40', title: 'Swim with Sharks', category: 'Adventure' },
+  { id: 'k41', title: 'Zip Line', category: 'Adventure' },
+  { id: 'k42', title: 'Airbnb Getaway', category: 'Travel' },
+  { id: 'k43', title: 'Horse Back Riding', category: 'Outdoors' },
+  { id: 'k44', title: 'River Rafting', category: 'Adventure' },
+  { id: 'k45', title: 'Skating', category: 'Active' },
+  { id: 'k46', title: 'Concerts — Drake & Fridayy', category: 'Culture' },
+  { id: 'k47', title: 'Night Drive', category: 'Experience' },
+  { id: 'k48', title: 'Outdoor Movie / Drive-In', category: 'Culture' },
+  { id: 'k49', title: 'Night Fishing', category: 'Outdoors' },
+  { id: 'k50', title: 'Magic Show / Illusionist', category: 'Culture' },
+  { id: 'k51', title: 'K1 Indoor Karts', category: 'Active' },
+  { id: 'k52', title: 'Everest', category: 'Adventure' },
 ]
 
 const LIFE_EVENTS = [
   'First Noire pop-up — bring family as VIPs. They should feel the world you\'re building.',
   'First big month — celebrate together. Let them witness the turn.',
   'A weekend trip together. Shared experience creates shared memory.',
-  'Introduce them to your network when the time is right.',
   'Legacy conversation — what do they want to be remembered for?',
-]
-
-const SUGGESTED_EXPERIENCES = [
-  { label: 'Family dinner — recurring', note: 'The table is the foundation of everything.' },
-  { label: 'Weekend trip', note: 'Even a short one. Shared experiences matter.' },
-  { label: 'Noire exclusive event — family invited', note: 'Show them the brand world you\'re building.' },
-  { label: 'Sunday tradition', note: 'Calls, meals, something consistent. Build the rhythm.' },
 ]
 
 const issueFields: FormField[] = [
@@ -94,16 +165,21 @@ const contactFields: FormField[] = [
   { name: 'notes', label: 'Notes', type: 'textarea' },
 ]
 
+const CATEGORY_GROUPS = ['Active', 'Adventure', 'Travel', 'Outdoors', 'Culture', 'Creative', 'Experience', 'Learning', 'Legacy']
+
 export default function FamilyPage() {
   const { demoData } = useDemoMode()
   const [homeIssues, setHomeIssues] = useState<HomeIssue[]>(demoData.homeIssues)
   const [expandedRel, setExpandedRel] = useState<string | null>(null)
+  const [selectedProtection, setSelectedProtection] = useState<typeof PROTECTION_AGENTS[0] | null>(null)
   const [groceryList, setGroceryList] = useState<string[]>(['Rice', 'Chicken', 'Eggs', 'Bread', 'Oat milk'])
   const [newGrocery, setNewGrocery] = useState('')
   const [memories, setMemories] = useState<string[]>([])
   const [memoryNote, setMemoryNote] = useState('')
   const [addModal, setAddModal] = useState<'issue' | 'contact' | null>(null)
-  const [activeTab, setActiveTab] = useState<'relationships' | 'home' | 'moments'>('relationships')
+  const [activeTab, setActiveTab] = useState<'relationships' | 'home' | 'kids' | 'moments'>('relationships')
+  const [doneItems, setDoneItems] = useState<string[]>([])
+  const [kidsFilter, setKidsFilter] = useState<string | null>(null)
 
   const openIssues = homeIssues.filter(i => i.status !== 'resolved' && i.status !== 'closed')
 
@@ -119,6 +195,14 @@ export default function FamilyPage() {
     return 'text-text-muted border-border'
   }
 
+  const toggleDone = (id: string) => {
+    setDoneItems(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  const filteredKids = kidsFilter
+    ? KIDS_BUCKET_LIST.filter(k => k.category === kidsFilter)
+    : KIDS_BUCKET_LIST
+
   return (
     <div className="px-4 py-6 space-y-5">
       <div>
@@ -127,13 +211,13 @@ export default function FamilyPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-surface-2 rounded-lg p-1">
-        {(['relationships', 'home', 'moments'] as const).map(tab => (
+      <div className="flex gap-1 bg-surface-2 rounded-lg p-1 overflow-x-auto scrollbar-none">
+        {(['relationships', 'home', 'kids', 'moments'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={clsx(
-              'flex-1 py-1.5 rounded-md text-xs font-medium uppercase tracking-wider transition-all',
+              'flex-1 flex-shrink-0 py-1.5 rounded-md text-xs font-medium uppercase tracking-wider transition-all',
               activeTab === tab ? 'bg-surface text-accent border border-border' : 'text-text-muted hover:text-text-secondary'
             )}
           >
@@ -169,7 +253,6 @@ export default function FamilyPage() {
                         {rel.accessLevel}
                       </span>
                     </div>
-                    {/* Health bar */}
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex-1 h-1 bg-surface-2 rounded-full overflow-hidden">
                         <div
@@ -188,7 +271,6 @@ export default function FamilyPage() {
                   </div>
                 </div>
 
-                {/* Agent next action */}
                 <div className="mt-3 p-3 bg-surface-2 rounded-lg border border-border">
                   <p className="text-[9px] uppercase tracking-wider text-accent mb-1 flex items-center gap-1">
                     <Zap size={8} />Agent Recommendation
@@ -197,7 +279,6 @@ export default function FamilyPage() {
                 </div>
               </button>
 
-              {/* Expanded Detail */}
               <AnimatePresence>
                 {expandedRel === rel.id && (
                   <motion.div
@@ -218,7 +299,6 @@ export default function FamilyPage() {
                           ))}
                         </div>
                       </div>
-
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Recurring Touch Points</p>
                         {rel.touchPoints.map((tp, i) => (
@@ -228,12 +308,10 @@ export default function FamilyPage() {
                           </div>
                         ))}
                       </div>
-
                       <div>
                         <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Agent Notes</p>
                         <p className="text-xs text-text-muted">{rel.notes}</p>
                       </div>
-
                       <div className="flex gap-2">
                         <button className="flex-1 py-2 rounded-lg bg-surface border border-border text-xs text-text-secondary hover:text-accent hover:border-accent/40 transition-all">
                           Log Interaction
@@ -249,7 +327,31 @@ export default function FamilyPage() {
             </motion.div>
           ))}
 
-          {/* Life Events to Share */}
+          {/* Legacy Protection Agents */}
+          <div className="pt-2">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3 flex items-center gap-1.5">
+              <Shield size={10} />Legacy Protection
+            </p>
+            <p className="text-xs text-text-muted mb-3">AI agents managing your protection infrastructure — for them, not just for you.</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PROTECTION_AGENTS.map(agent => (
+                <button
+                  key={agent.id}
+                  onClick={() => setSelectedProtection(agent)}
+                  className="bg-surface border border-[#1c1c1c] rounded-xl p-4 text-left hover:border-[#2a2a2a] transition-colors relative"
+                >
+                  {agent.pulse && (
+                    <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  )}
+                  <p className="text-sm font-medium" style={{ color: agent.color }}>{agent.code}</p>
+                  <p className="text-[9px] text-text-muted uppercase tracking-wider mt-0.5">{agent.dept}</p>
+                  <p className="text-[10px] text-text-muted mt-2 leading-relaxed line-clamp-2">{agent.status}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Life Events */}
           <div className="pt-2">
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3 flex items-center gap-1.5">
               <Heart size={10} />Life Events to Share
@@ -259,19 +361,6 @@ export default function FamilyPage() {
                 <div key={i} className="px-4 py-3 bg-surface border border-border rounded-lg text-xs text-text-muted flex items-start gap-2.5">
                   <span className="text-accent flex-shrink-0 mt-0.5">◆</span>
                   {event}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggested Experiences */}
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Suggested Experiences</p>
-            <div className="space-y-2">
-              {SUGGESTED_EXPERIENCES.map((exp, i) => (
-                <div key={i} className="p-4 bg-surface border border-border rounded-lg">
-                  <p className="text-sm text-text-primary">{exp.label}</p>
-                  <p className="text-xs text-text-muted mt-1">{exp.note}</p>
                 </div>
               ))}
             </div>
@@ -312,10 +401,71 @@ export default function FamilyPage() {
         </div>
       )}
 
+      {/* Kids Tab — Bucket List */}
+      {activeTab === 'kids' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">Kids Bucket List</p>
+            <p className="text-[10px] text-accent">{doneItems.length}/{KIDS_BUCKET_LIST.length} done</p>
+          </div>
+
+          {/* Category filters */}
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
+            <button
+              onClick={() => setKidsFilter(null)}
+              className={clsx(
+                'flex-shrink-0 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider border transition-all',
+                !kidsFilter ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted'
+              )}
+            >
+              All
+            </button>
+            {CATEGORY_GROUPS.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setKidsFilter(kidsFilter === cat ? null : cat)}
+                className={clsx(
+                  'flex-shrink-0 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider border transition-all',
+                  kidsFilter === cat ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted'
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-1.5">
+            {filteredKids.map(item => (
+              <button
+                key={item.id}
+                onClick={() => toggleDone(item.id)}
+                className={clsx(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all text-left',
+                  doneItems.includes(item.id)
+                    ? 'border-accent/20 bg-accent/5'
+                    : 'border-border bg-surface hover:border-border'
+                )}
+              >
+                {doneItems.includes(item.id) ? (
+                  <CheckSquare size={15} className="text-accent flex-shrink-0" />
+                ) : (
+                  <Square size={15} className="text-text-muted flex-shrink-0" />
+                )}
+                <p className={clsx('text-sm flex-1 text-left', doneItems.includes(item.id) ? 'text-text-muted line-through' : 'text-text-primary')}>
+                  {item.title}
+                </p>
+                <span className="text-[9px] uppercase tracking-wider text-text-muted border border-border px-1.5 py-0.5 rounded flex-shrink-0">
+                  {item.category}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Moments Tab */}
       {activeTab === 'moments' && (
         <div className="space-y-4">
-          {/* Grocery */}
           <div>
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Grocery List</p>
             <Card variant="default" className="p-3">
@@ -334,7 +484,6 @@ export default function FamilyPage() {
             </Card>
           </div>
 
-          {/* Family Moments */}
           <div>
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">Family Moments</p>
             <Card variant="default" className="p-3">
@@ -350,6 +499,27 @@ export default function FamilyPage() {
           </div>
         </div>
       )}
+
+      {/* Protection Agent Detail Modal */}
+      <Modal isOpen={!!selectedProtection} onClose={() => setSelectedProtection(null)} title={selectedProtection ? `${selectedProtection.code} — ${selectedProtection.dept}` : ''}>
+        {selectedProtection && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Shield size={24} style={{ color: selectedProtection.color }} />
+              <div>
+                <p className="text-lg font-medium" style={{ color: selectedProtection.color }}>{selectedProtection.code}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wider">{selectedProtection.dept}</p>
+              </div>
+              <span className={clsx('ml-auto w-2 h-2 rounded-full', selectedProtection.pulse ? 'bg-green-400 animate-pulse' : 'bg-text-muted')} />
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">{selectedProtection.detail}</p>
+            <div className="bg-surface-2 rounded-lg p-3 border border-border">
+              <p className="text-[9px] uppercase tracking-wider text-accent mb-1">Priority</p>
+              <p className="text-xs text-text-primary">{selectedProtection.priority}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Modals */}
       <Modal isOpen={addModal === 'issue'} onClose={() => setAddModal(null)} title="Add Home Issue">

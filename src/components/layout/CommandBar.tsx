@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Settings } from 'lucide-react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { clsx } from 'clsx'
@@ -125,12 +126,18 @@ export function CommandBar({ isDemoMode = false }: CommandBarProps) {
               className="flex items-center justify-between w-full"
             >
               <span className="text-accent font-serif text-sm tracking-[0.2em] uppercase">Legacy OS</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 {isDemoMode && (
-                  <span className="text-[9px] uppercase tracking-widest border border-accent/40 text-accent/70 px-2 py-0.5 rounded">
+                  <span className="text-[9px] uppercase tracking-widest border border-accent/40 text-accent/70 px-2 py-0.5 rounded mr-1">
                     Demo
                   </span>
                 )}
+                <Link
+                  href="/admin"
+                  className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
+                >
+                  <Settings size={15} />
+                </Link>
                 <button
                   onClick={handleExpand}
                   className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
