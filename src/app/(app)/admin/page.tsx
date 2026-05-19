@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { RotateCcw, Shield, Download, AlertCircle, CheckCircle, Activity, Plus, Search, Archive, FileText, Image, Film, Mic, Receipt, Trash2 } from 'lucide-react'
+import { RotateCcw, Shield, Download, AlertCircle, CheckCircle, Activity, Plus, Search, Archive, FileText, Image, Film, Mic, Receipt, Trash2, Link2, RefreshCw, Lock } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Modal } from '@/components/ui/Modal'
@@ -43,6 +43,69 @@ const TYPE_OPTIONS = [
   { value: 'other', label: 'Other' },
 ]
 
+const LINKED_ACCOUNTS = [
+  {
+    id: 'fidelity',
+    name: 'Fidelity Investments',
+    category: 'Brokerage & Retirement',
+    type: 'investment',
+    lastFour: '4821',
+    status: 'connected' as const,
+    lastSync: new Date(Date.now() - 3 * 3600000).toISOString(),
+    balance: '$12,440.00',
+    note: 'Roth IRA + brokerage account',
+    color: '#2e7d32',
+  },
+  {
+    id: 'chase',
+    name: 'Chase Bank',
+    category: 'Checking & Savings',
+    type: 'bank',
+    lastFour: '7703',
+    status: 'connected' as const,
+    lastSync: new Date(Date.now() - 1 * 3600000).toISOString(),
+    balance: '$1,847.32',
+    note: 'Primary checking — direct deposit',
+    color: '#1565c0',
+  },
+  {
+    id: 'coinbase',
+    name: 'Coinbase',
+    category: 'Crypto Exchange',
+    type: 'crypto',
+    lastFour: null,
+    status: 'connected' as const,
+    lastSync: new Date(Date.now() - 6 * 3600000).toISOString(),
+    balance: '$340.17',
+    note: 'BTC, ETH holdings',
+    color: '#1652f0',
+  },
+  {
+    id: 'kraken',
+    name: 'Kraken',
+    category: 'Crypto Exchange',
+    type: 'crypto',
+    lastFour: null,
+    status: 'pending' as const,
+    lastSync: null,
+    balance: null,
+    note: 'API key pending — add in settings',
+    color: '#5741d9',
+  },
+  {
+    id: 'cashapp',
+    name: 'Cash App',
+    category: 'P2P Payments',
+    type: 'payments',
+    lastFour: null,
+    status: 'connected' as const,
+    lastSync: new Date(Date.now() - 30 * 60000).toISOString(),
+    balance: '$215.00',
+    note: '$cashtag linked — Noire payments',
+    color: '#00d632',
+  },
+]
+
 const DEMO_ARTIFACTS: Partial<Artifact>[] = [
   { id: 'art-1', title: 'LIHEAP Application Copy', type: 'document', category: 'assistance', tags: ['liheap', 'utilities', 'assistance'], ai_summary: 'Energy assistance application — submitted. Appointment confirmed.', created_at: new Date(Date.now() - 2 * 86400000).toISOString(), updated_at: new Date().toISOString() },
   { id: 'art-2', title: 'Meineke Fuel Pump Quote', type: 'receipt', category: 'car', tags: ['car', 'meineke', 'repair'], ai_summary: 'Fuel pump replacement quote — $980 parts + labor.', created_at: new Date(Date.now() - 7 * 86400000).toISOString(), updated_at: new Date().toISOString() },
@@ -51,7 +114,8 @@ const DEMO_ARTIFACTS: Partial<Artifact>[] = [
 
 export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState(DEMO_AUDIT_LOGS)
-  const [activeTab, setActiveTab] = useState<'audit' | 'errors' | 'permissions' | 'ai' | 'artifacts'>('audit')
+  const [activeTab, setActiveTab] = useState<'audit' | 'errors' | 'permissions' | 'ai' | 'artifacts' | 'connections'>('audit')
+  const [syncingAccount, setSyncingAccount] = useState<string | null>(null)
   const [rolledBack, setRolledBack] = useState<string[]>([])
   const [artifacts, setArtifacts] = useState<Partial<Artifact>[]>(DEMO_ARTIFACTS)
   const [artifactSearch, setArtifactSearch] = useState('')
@@ -132,7 +196,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex border-b border-border overflow-x-auto scrollbar-none">
-        {(['audit', 'errors', 'permissions', 'ai', 'artifacts'] as const).map(tab => (
+        {(['audit', 'errors', 'permissions', 'ai', 'artifacts', 'connections'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -257,6 +321,88 @@ export default function AdminPage() {
                 </p>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'connections' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">{LINKED_ACCOUNTS.length} accounts</p>
+            <div className="flex items-center gap-1 text-[10px] text-text-muted">
+              <Lock size={10} />
+              <span>E2E Encrypted</span>
+            </div>
+          </div>
+
+          <div className="bg-accent/10 border border-accent/20 rounded-lg px-4 py-3">
+            <p className="text-xs text-accent font-medium">Secure Read-Only Connections</p>
+            <p className="text-[10px] text-text-muted mt-0.5">All account credentials are encrypted at rest. Legacy OS never stores passwords — only read tokens.</p>
+          </div>
+
+          <div className="space-y-2">
+            {LINKED_ACCOUNTS.map(account => (
+              <div key={account.id} className="bg-surface border border-border rounded-lg p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: account.color + '22', border: `1px solid ${account.color}44` }}>
+                      <Link2 size={14} style={{ color: account.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-text-primary font-medium truncate">{account.name}</p>
+                        {account.lastFour && <span className="text-[10px] text-text-muted">···{account.lastFour}</span>}
+                      </div>
+                      <p className="text-[10px] text-text-muted mt-0.5">{account.category}</p>
+                      {account.note && <p className="text-[10px] text-text-muted/70 mt-0.5 italic">{account.note}</p>}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <span className={clsx('text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-medium',
+                      account.status === 'connected' ? 'bg-green-500/15 text-green-400' :
+                      account.status === 'pending' ? 'bg-yellow-500/15 text-yellow-400' :
+                      'bg-crisis/15 text-crisis'
+                    )}>{account.status}</span>
+                    {account.balance && (
+                      <p className="text-sm font-medium text-text-primary">{account.balance}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                  <p className="text-[10px] text-text-muted">
+                    {account.lastSync ? (() => {
+                      const diffMs = Date.now() - new Date(account.lastSync).getTime()
+                      const hrs = Math.floor(diffMs / 3600000)
+                      const mins = Math.floor(diffMs / 60000)
+                      return hrs >= 1 ? `Synced ${hrs}hr ago` : `Synced ${mins}min ago`
+                    })() : 'Not synced yet'}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSyncingAccount(account.id)
+                      setTimeout(() => setSyncingAccount(null), 1500)
+                    }}
+                    className={clsx('flex items-center gap-1.5 text-[10px] px-2 py-1 rounded border transition-colors',
+                      account.status === 'connected'
+                        ? 'border-border text-text-muted hover:border-accent/40 hover:text-accent'
+                        : 'border-accent/40 text-accent hover:bg-accent/10'
+                    )}
+                  >
+                    <RefreshCw size={10} className={syncingAccount === account.id ? 'animate-spin' : ''} />
+                    {account.status === 'connected' ? 'Sync' : 'Connect'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-surface border border-border rounded-lg p-4">
+            <p className="text-[10px] uppercase tracking-wider text-text-muted mb-2">Add Account</p>
+            <p className="text-[11px] text-text-secondary">Connect additional accounts via Plaid, direct API keys, or OAuth. All connections are zero-trust — read-only by default.</p>
+            <button className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg text-xs text-text-muted hover:border-accent/40 hover:text-accent transition-colors">
+              <Plus size={12} />Connect New Account
+            </button>
           </div>
         </div>
       )}

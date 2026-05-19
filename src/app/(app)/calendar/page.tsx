@@ -5,7 +5,7 @@ import {
   format, addDays, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, isSameDay, isSameMonth, isToday, getDay, parseISO,
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Compass, CheckSquare, Square } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Compass } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Modal } from '@/components/ui/Modal'
 import { QuickAddForm } from '@/components/ui/QuickAddForm'
@@ -120,17 +120,6 @@ export default function CalendarPage() {
   const [events, setEvents] = useState(DEMO_EVENTS)
   const [addModal, setAddModal] = useState(false)
   const [view, setView] = useState<'month' | 'agenda'>('month')
-  const [kidsFilter, setKidsFilter] = useState<string | null>(null)
-  const [doneKids, setDoneKids] = useState<string[]>([])
-
-  const toggleKidsDone = (id: string) => {
-    setDoneKids(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
-  }
-
-  const filteredKids = kidsFilter
-    ? KIDS_SCHEDULE.filter(k => k.category === kidsFilter)
-    : KIDS_SCHEDULE
-
   const monthDays = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) })
   const firstDayOfMonth = getDay(startOfMonth(currentMonth))
   const leadingBlanks = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
@@ -290,48 +279,6 @@ export default function CalendarPage() {
               <p className="text-xs text-text-secondary">{item.label}</p>
               <p className="text-[10px] text-text-muted">{item.frequency}</p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Kids Bucket List */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">Kids Bucket List</p>
-          <p className="text-[10px] text-accent">{doneKids.length}/{KIDS_SCHEDULE.length} done</p>
-        </div>
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-2 mb-3">
-          <button
-            onClick={() => setKidsFilter(null)}
-            className={clsx('flex-shrink-0 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-wider border transition-all', !kidsFilter ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted')}
-          >All</button>
-          {KIDS_CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setKidsFilter(kidsFilter === cat ? null : cat)}
-              className={clsx('flex-shrink-0 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-wider border transition-all', kidsFilter === cat ? 'border-accent/50 text-accent bg-accent/10' : 'border-border text-text-muted')}
-            >{cat}</button>
-          ))}
-        </div>
-        <div className="space-y-1.5">
-          {filteredKids.map(item => (
-            <button
-              key={item.id}
-              onClick={() => toggleKidsDone(item.id)}
-              className={clsx(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all text-left',
-                doneKids.includes(item.id) ? 'border-accent/20 bg-accent/5' : 'border-border bg-surface'
-              )}
-            >
-              {doneKids.includes(item.id)
-                ? <CheckSquare size={13} className="text-accent flex-shrink-0" />
-                : <Square size={13} className="text-text-muted flex-shrink-0" />
-              }
-              <p className={clsx('text-sm flex-1', doneKids.includes(item.id) ? 'text-text-muted line-through' : 'text-text-primary')}>
-                {item.title}
-              </p>
-              <span className="text-[9px] text-text-muted flex-shrink-0">{item.category}</span>
-            </button>
           ))}
         </div>
       </div>

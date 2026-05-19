@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Search, X, Settings } from 'lucide-react'
+import { Search, X, Settings, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -132,16 +132,13 @@ export function CommandBar({ isDemoMode = false }: CommandBarProps) {
                     Demo
                   </span>
                 )}
-                <Link
-                  href="/admin"
-                  className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
-                >
+                <Link href="/calendar" className="p-1.5 text-text-muted hover:text-text-primary transition-colors" title="Calendar">
+                  <Calendar size={15} />
+                </Link>
+                <Link href="/admin" className="p-1.5 text-text-muted hover:text-text-primary transition-colors" title="Admin">
                   <Settings size={15} />
                 </Link>
-                <button
-                  onClick={handleExpand}
-                  className="p-1.5 text-text-muted hover:text-text-primary transition-colors"
-                >
+                <button onClick={handleExpand} className="p-1.5 text-text-muted hover:text-text-primary transition-colors">
                   <Search size={16} />
                 </button>
               </div>

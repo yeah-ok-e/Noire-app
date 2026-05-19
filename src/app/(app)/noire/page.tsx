@@ -228,36 +228,52 @@ export default function NoirePage() {
 
   return (
     <div className="relative min-h-screen" style={{ background: 'linear-gradient(to bottom, #0a0601, #020202)' }}>
-      {/* Entrance Animation */}
+      {/* Entrance — Luxury Typography */}
       <AnimatePresence>
         {!entranceDone && (
           <motion.div
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6"
+            exit={{ opacity: 0, filter: 'blur(10px)', scale: 1.015 }}
+            transition={{ duration: 1.4, ease: [0.7, 0, 0.84, 0] }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
             style={{ background: '#020202' }}
           >
+            {/* Top ambient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 rounded-full opacity-[0.04]"
+              style={{ background: 'radial-gradient(ellipse, #d4af7a, transparent)', filter: 'blur(40px)' }} />
+
+            {/* NOIRE — letter stagger */}
+            <div className="flex items-end" style={{ gap: '0.18em', letterSpacing: '0' }}>
+              {'NOIRE'.split('').map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 28, filter: 'blur(6px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 1.5, delay: 0.15 + i * 0.13, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-[58px] font-light text-[#f0ede8] select-none"
+                  style={{ fontFamily: 'Georgia, "Times New Roman", serif', lineHeight: 1 }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Gold hairline — extends from center */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <NoireLogoBadge size={140} />
-            </motion.div>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '60px' }}
-              transition={{ duration: 1.2, delay: 1, ease: 'easeOut' }}
-              className="h-px bg-[#d4af7a]"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: '64px', opacity: 1 }}
+              transition={{ duration: 1.4, delay: 1.05, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-7 h-px bg-[#d4af7a]"
             />
+
+            {/* Sub-label */}
             <motion.p
               initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 0.4, y: 0 }}
-              transition={{ duration: 1, delay: 1.5 }}
-              className="text-[10px] uppercase tracking-[0.5em] text-[#888]"
+              animate={{ opacity: 0.3, y: 0 }}
+              transition={{ duration: 1.2, delay: 1.7, ease: 'easeOut' }}
+              className="mt-4 text-[9px] uppercase tracking-[0.55em] text-[#888]"
             >
-              Identity Architecture
+              MMXVII &nbsp;·&nbsp; MMXXVI
             </motion.p>
           </motion.div>
         )}

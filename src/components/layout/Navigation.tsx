@@ -8,7 +8,6 @@ import {
   Gem,
   Home,
   Heart,
-  Calendar,
   BookOpen,
 } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -19,7 +18,6 @@ const navItems = [
   { label: 'Noire', href: '/noire', Icon: Gem },
   { label: 'Family', href: '/family', Icon: Home },
   { label: 'Body', href: '/body', Icon: Heart },
-  { label: 'Calendar', href: '/calendar', Icon: Calendar },
   { label: 'Legacy', href: '/legacy', Icon: BookOpen },
 ]
 
