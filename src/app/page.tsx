@@ -1,101 +1,118 @@
-import Image from "next/image";
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
-export default function Home() {
+function CompassSVG({ className }: { className?: string }) {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <svg className={className} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer ring */}
+      <circle cx="60" cy="60" r="56" stroke="rgba(240,237,232,0.15)" strokeWidth="0.5" />
+      <circle cx="60" cy="60" r="50" stroke="rgba(240,237,232,0.08)" strokeWidth="0.5" />
+      {/* Cardinal tick marks */}
+      <line x1="60" y1="4" x2="60" y2="14" stroke="rgba(240,237,232,0.5)" strokeWidth="1"/>
+      <line x1="60" y1="106" x2="60" y2="116" stroke="rgba(240,237,232,0.3)" strokeWidth="0.8"/>
+      <line x1="4" y1="60" x2="14" y2="60" stroke="rgba(240,237,232,0.3)" strokeWidth="0.8"/>
+      <line x1="106" y1="60" x2="116" y2="60" stroke="rgba(240,237,232,0.3)" strokeWidth="0.8"/>
+      {/* Diagonal ticks */}
+      {[45,135,225,315].map(deg => (
+        <line
+          key={deg}
+          x1={60 + 50 * Math.cos((deg - 90) * Math.PI / 180)}
+          y1={60 + 50 * Math.sin((deg - 90) * Math.PI / 180)}
+          x2={60 + 55 * Math.cos((deg - 90) * Math.PI / 180)}
+          y2={60 + 55 * Math.sin((deg - 90) * Math.PI / 180)}
+          stroke="rgba(240,237,232,0.2)"
+          strokeWidth="0.6"
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      ))}
+      {/* N label */}
+      <text x="60" y="22" textAnchor="middle" fontSize="8" fill="rgba(240,237,232,0.9)" fontFamily="Inter,sans-serif" fontWeight="600" letterSpacing="2">N</text>
+      {/* North needle (accent gold) */}
+      <polygon
+        points="60,28 55,65 60,60 65,65"
+        fill="#d4af7a"
+        fillOpacity="0.9"
+      />
+      {/* South needle */}
+      <polygon
+        points="60,92 55,55 60,60 65,55"
+        fill="rgba(240,237,232,0.25)"
+      />
+      {/* Center dot */}
+      <circle cx="60" cy="60" r="3" fill="#d4af7a" fillOpacity="0.8" />
+      <circle cx="60" cy="60" r="1.5" fill="#080808" />
+    </svg>
+  )
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+export default function SplashPage() {
+  const router = useRouter()
+  const [phase, setPhase] = useState(0)
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 600)
+    const t2 = setTimeout(() => setPhase(2), 1600)
+    const t3 = setTimeout(() => setPhase(3), 2400)
+    const t4 = setTimeout(() => router.replace('/command'), 3800)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4) }
+  }, [router])
+
+  return (
+    <div
+      className="fixed inset-0 bg-[#080808] flex flex-col items-center justify-center cursor-pointer select-none"
+      onClick={() => router.replace('/command')}
+    >
+      {/* Ambient pulse */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-96 h-96 rounded-full bg-[#d4af7a] opacity-[0.025] blur-3xl animate-pulse" />
+      </div>
+
+      <div className="relative flex flex-col items-center gap-8">
+        {/* Compass */}
+        <AnimatePresence>
+          {phase >= 1 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              className="animate-pulse-glow"
+            >
+              <CompassSVG className="w-28 h-28" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* LEGACY OS */}
+        <AnimatePresence>
+          {phase >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center gap-3"
+            >
+              <h1 className="text-4xl font-light tracking-[0.35em] text-[#f0ede8] uppercase">
+                LEGACY OS
+              </h1>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Brand line */}
+        <AnimatePresence>
+          {phase >= 3 && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              transition={{ duration: 1 }}
+              className="text-xs tracking-[0.3em] text-[#888888] uppercase mt-2"
+            >
+              A Lewis Family Product • MMXXVI
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
-  );
+  )
 }
