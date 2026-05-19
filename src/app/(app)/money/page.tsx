@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Zap, TrendingUp, Shield, BarChart2, Bitcoin } from 'lucide-react'
+import { Plus, Zap, TrendingUp, Shield, BarChart2, Bitcoin, Link2, CheckCircle2, Clock } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Modal } from '@/components/ui/Modal'
@@ -139,6 +139,34 @@ const MONEY_AGENTS = [
   },
 ]
 
+const LINKED_ACCOUNTS = [
+  {
+    id: 'fidelity', name: 'Fidelity Investments', type: 'Brokerage / Retirement', status: 'pending',
+    icon: '📈', note: 'Connect to sync investments, 401k, and Roth IRA balances',
+    mockBalance: '$4,820', color: '#4ade80',
+  },
+  {
+    id: 'chase', name: 'Chase Checking', type: 'Bank Account', status: 'pending',
+    icon: '🏦', note: 'Connect to auto-sync cash balance and transactions',
+    mockBalance: '$1,240', color: '#60a5fa',
+  },
+  {
+    id: 'coinbase', name: 'Coinbase', type: 'Crypto Exchange', status: 'pending',
+    icon: '₿', note: 'Connect to track BTC, ETH, and alt positions in real time',
+    mockBalance: '$680', color: '#facc15',
+  },
+  {
+    id: 'kraken', name: 'Kraken', type: 'Crypto Exchange', status: 'pending',
+    icon: '⚡', note: 'Secondary crypto account — connects via read-only API key',
+    mockBalance: '—', color: '#a78bfa',
+  },
+  {
+    id: 'cash-app', name: 'Cash App', type: 'P2P / Spending', status: 'pending',
+    icon: '💸', note: 'Track daily spending, Noire transactions, and P2P transfers',
+    mockBalance: '—', color: '#d4af7a',
+  },
+]
+
 const WEALTH_MILESTONES = [
   'First $10k month',
   'Car with zero payment anxiety',
@@ -156,6 +184,7 @@ export default function MoneyPage() {
   const { store, getCurrentCash, addBill, addDebt, addCashUpdate, demoData } = useDemoMode()
   const [activeTab, setActiveTab] = useState<'overview' | 'bills' | 'income' | 'vision'>('overview')
   const [selectedAgent, setSelectedAgent] = useState<typeof MONEY_AGENTS[0] | null>(null)
+  const [linkedAccounts, setLinkedAccounts] = useState(LINKED_ACCOUNTS)
   const [addModal, setAddModal] = useState<'bill' | 'debt' | 'cash' | 'income' | 'application' | 'assistance' | null>(null)
   const [incomeSources, setIncomeSources] = useState(demoData.incomeSources)
   const [assistancePrograms, setAssistancePrograms] = useState(demoData.assistancePrograms)
@@ -260,6 +289,48 @@ export default function MoneyPage() {
               </div>
             ))}
           </div>
+          {/* Linked Accounts */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-text-muted flex items-center gap-1.5">
+                <Link2 size={10} />Linked Accounts
+              </p>
+              <p className="text-[10px] text-text-muted">{linkedAccounts.filter(a => a.status === 'connected').length}/{linkedAccounts.length} connected</p>
+            </div>
+            <div className="space-y-2">
+              {linkedAccounts.map(acct => (
+                <div key={acct.id} className="flex items-center gap-3 bg-surface border border-border rounded-xl p-3">
+                  <span className="text-lg flex-shrink-0">{acct.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-text-primary font-medium">{acct.name}</p>
+                    <p className="text-[10px] text-text-muted">{acct.type}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                    {acct.status === 'connected' ? (
+                      <div className="flex items-center gap-1 text-[10px] text-green-400">
+                        <CheckCircle2 size={11} />Connected
+                      </div>
+                    ) : acct.status === 'pending' ? (
+                      <button
+                        onClick={() => setLinkedAccounts(prev => prev.map(a => a.id === acct.id ? { ...a, status: 'connected' } : a))}
+                        className="flex items-center gap-1 text-[10px] text-accent border border-accent/30 px-2.5 py-1 rounded-full hover:bg-accent/10 transition-colors"
+                      >
+                        <Link2 size={9} />Connect
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1 text-[10px] text-yellow-400">
+                        <Clock size={11} />Pending
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-text-muted mt-2 leading-relaxed">
+              Secure read-only connections. No transaction authority. Data stays encrypted in the system.
+            </p>
+          </div>
+
           <div>
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Active Income</p>
             {incomeSources.filter(i => i.status === 'active').slice(0, 3).map(source => (

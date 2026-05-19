@@ -24,54 +24,62 @@ function starPoints(cx: number, cy: number, R: number, r: number): string {
 
 function NoireLogoBadge({ size = 120, className }: { size?: number; className?: string }) {
   const fg = '#ffffff'
+  const bg = '#000000'
   return (
     <svg width={size} height={size} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
-        <path id="noire-arc-top" d="M 22,100 A 78,78 0 0,1 178,100" />
+        <path id="noire-arc-top" d="M 26,100 A 74,74 0 0,1 174,100" />
+        <path id="noire-arc-bottom-l" d="M 38,138 A 68,68 0 0,0 162,138" />
       </defs>
-      {/* Outer ring */}
-      <circle cx="100" cy="100" r="93" stroke={fg} strokeWidth="7" fill="none" />
-      {/* Inner ring */}
-      <circle cx="100" cy="100" r="79" stroke={fg} strokeWidth="1.5" fill="none" />
-      {/* Bottom filled banner */}
-      <path d="M 41,141 A 68,68 0 0,0 159,141 L 158,151 A 76,76 0 0,1 42,151 Z" fill={fg} />
-      {/* NOIRE curved text */}
-      <text fill={fg} fontSize="20" fontWeight="900" letterSpacing="5" fontFamily="'Arial Black', Arial, sans-serif">
+      {/* Black filled background */}
+      <circle cx="100" cy="100" r="98" fill={bg} />
+      {/* Outer ring — bold */}
+      <circle cx="100" cy="100" r="93" stroke={fg} strokeWidth="8" fill="none" />
+      {/* Inner ring — fine */}
+      <circle cx="100" cy="100" r="76" stroke={fg} strokeWidth="1.5" fill="none" />
+      {/* Bottom banner — filled white ribbon */}
+      <path d="M 36,136 A 72,72 0 0,0 164,136 L 162,148 A 76,76 0 0,1 38,148 Z" fill={fg} />
+      {/* Thin separator line above banner */}
+      <path d="M 38,134 A 70,70 0 0,0 162,134" stroke={fg} strokeWidth="0.8" fill="none" opacity="0.4" />
+      {/* NOIRE curved text along top arc */}
+      <text fill={fg} fontSize="18" fontWeight="900" letterSpacing="6" fontFamily="'Arial Black', Arial, sans-serif">
         <textPath href="#noire-arc-top" startOffset="50%" textAnchor="middle">NOIRE</textPath>
       </text>
-      {/* MMXVII — left, rotated */}
-      <text fill={fg} fontSize="8" fontWeight="700" letterSpacing="2" fontFamily="Arial, sans-serif"
-        textAnchor="middle" transform="translate(32,100) rotate(-90)">MMXVII</text>
-      {/* MMXXVI — right, rotated */}
-      <text fill={fg} fontSize="8" fontWeight="700" letterSpacing="2" fontFamily="Arial, sans-serif"
-        textAnchor="middle" transform="translate(168,100) rotate(90)">MMXXVI</text>
-      {/* Compass rose — N point */}
-      <polygon points="100,51 103.5,93 100,100 96.5,93" fill={fg} />
-      {/* S point */}
-      <polygon points="100,149 103.5,107 100,100 96.5,107" fill={fg} />
-      {/* E point */}
-      <polygon points="149,100 107,103.5 100,100 107,96.5" fill={fg} />
-      {/* W point */}
-      <polygon points="51,100 93,103.5 100,100 93,96.5" fill={fg} />
-      {/* NE diagonal */}
-      <polygon points="129,71 104,97 100,100 103,96" fill={fg} />
+      {/* MMXVII — left vertical */}
+      <text fill={fg} fontSize="7.5" fontWeight="700" letterSpacing="2.5" fontFamily="Arial, sans-serif"
+        textAnchor="middle" transform="translate(30,103) rotate(-90)">MMXVII</text>
+      {/* MMXXVI — right vertical */}
+      <text fill={fg} fontSize="7.5" fontWeight="700" letterSpacing="2.5" fontFamily="Arial, sans-serif"
+        textAnchor="middle" transform="translate(170,97) rotate(90)">MMXXVI</text>
+      {/* Compass rose — N point (long) */}
+      <polygon points="100,46 103,90 100,98 97,90" fill={fg} />
+      {/* S point (long) */}
+      <polygon points="100,130 103,108 100,102 97,108" fill={fg} />
+      {/* E point (long) */}
+      <polygon points="154,100 110,103 102,100 110,97" fill={fg} />
+      {/* W point (long) */}
+      <polygon points="46,100 90,103 98,100 90,97" fill={fg} />
+      {/* NE diagonal (shorter) */}
+      <polygon points="132,68 106,95 100,100 105,94" fill={fg} />
       {/* NW diagonal */}
-      <polygon points="71,71 96,97 100,100 97,96" fill={fg} />
+      <polygon points="68,68 94,95 100,100 95,94" fill={fg} />
       {/* SE diagonal */}
-      <polygon points="129,129 104,103 100,100 103,104" fill={fg} />
+      <polygon points="132,132 106,105 100,100 105,106" fill={fg} />
       {/* SW diagonal */}
-      <polygon points="71,129 96,103 100,100 97,104" fill={fg} />
-      {/* Four quadrant stars */}
-      <polygon points={starPoints(67, 67, 6, 2.5)} fill={fg} />
-      <polygon points={starPoints(133, 67, 6, 2.5)} fill={fg} />
-      <polygon points={starPoints(67, 129, 6, 2.5)} fill={fg} />
-      <polygon points={starPoints(133, 129, 6, 2.5)} fill={fg} />
-      {/* Banner stars (5 — dark on light banner) */}
-      <polygon points={starPoints(70, 145, 4, 1.8)} fill="black" />
-      <polygon points={starPoints(84, 145, 4, 1.8)} fill="black" />
-      <polygon points={starPoints(100, 145, 4, 1.8)} fill="black" />
-      <polygon points={starPoints(116, 145, 4, 1.8)} fill="black" />
-      <polygon points={starPoints(130, 145, 4, 1.8)} fill="black" />
+      <polygon points="68,132 94,105 100,100 95,106" fill={fg} />
+      {/* Center dot */}
+      <circle cx="100" cy="100" r="3.5" fill={fg} />
+      {/* Four quadrant accent stars */}
+      <polygon points={starPoints(65, 65, 5.5, 2.2)} fill={fg} />
+      <polygon points={starPoints(135, 65, 5.5, 2.2)} fill={fg} />
+      <polygon points={starPoints(65, 128, 5.5, 2.2)} fill={fg} />
+      <polygon points={starPoints(135, 128, 5.5, 2.2)} fill={fg} />
+      {/* Banner stars — 5 black stars on white ribbon */}
+      <polygon points={starPoints(68, 142, 4.5, 1.9)} fill={bg} />
+      <polygon points={starPoints(82, 142, 4.5, 1.9)} fill={bg} />
+      <polygon points={starPoints(100, 142, 4.5, 1.9)} fill={bg} />
+      <polygon points={starPoints(118, 142, 4.5, 1.9)} fill={bg} />
+      <polygon points={starPoints(132, 142, 4.5, 1.9)} fill={bg} />
     </svg>
   )
 }
