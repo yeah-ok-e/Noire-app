@@ -95,8 +95,8 @@ export function PlusButton() {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-[72px] left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full bg-accent text-background flex items-center justify-center shadow-lg hover:bg-accent/90 transition-all duration-200"
-        style={{ boxShadow: '0 0 20px rgba(212,175,122,0.4)' }}
+        className="fixed bottom-[80px] right-4 z-50 w-12 h-12 rounded-full bg-accent text-background flex items-center justify-center shadow-lg hover:bg-accent/90 transition-all duration-200"
+        style={{ boxShadow: '0 0 24px rgba(212,175,122,0.5)' }}
       >
         <motion.div animate={{ rotate: isOpen ? 45 : 0 }} transition={{ duration: 0.2 }}>
           <Plus size={22} strokeWidth={2.5} />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { motion } from 'framer-motion'
 import { AlertTriangle, TrendingUp, CheckCircle, Circle, ChevronRight } from 'lucide-react'
@@ -14,6 +14,14 @@ import { useOffline } from '@/lib/hooks/useOffline'
 import { formatCurrency, formatShortDate, formatRelativeTime } from '@/lib/utils/formatters'
 import { clsx } from 'clsx'
 
+const NON_NEGOTIABLES = [
+  { id: 'nn-money', label: 'Check the money', sub: 'Know your number every day' },
+  { id: 'nn-noire', label: 'Make a Noire move', sub: 'The brand never sleeps' },
+  { id: 'nn-legacy', label: 'Log to Legacy', sub: 'Document the journey in real time' },
+  { id: 'nn-body', label: 'Move the body', sub: 'Strength is infrastructure' },
+  { id: 'nn-family', label: 'Connect with family', sub: "Don't lose what you're building for" },
+]
+
 const EMOTIONAL_OPTIONS = [
   { value: 'calm', label: 'Calm', color: 'text-blue-400' },
   { value: 'focused', label: 'Focused', color: 'text-accent' },
@@ -26,25 +34,82 @@ export default function CommandPage() {
   const { demoData, store, getCurrentCash, completeReminder } = useDemoMode()
   const { isOffline, lastSynced, offlineData } = useOffline()
   const [emotionalState, setEmotionalState] = useState<string | null>(null)
+  const [checked, setChecked] = useState<string[]>([])
+
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const stored = localStorage.getItem(`nn-${today}`)
+    if (stored) {
+      try { setChecked(JSON.parse(stored)) } catch { setChecked([]) }
+    }
+  }, [])
+
+  const toggleNN = (id: string) => {
+    const today = new Date().toDateString()
+    setChecked(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      localStorage.setItem(`nn-${today}`, JSON.stringify(next))
+      return next
+    })
+  }
 
   const cashAmount = getCurrentCash()
   const bills = store.bills
   const reminders = store.reminders.filter(r => !r.completed)
 
-  const { isCrisis, reasons } = useCrisisMode({
-    cashAmount,
-    bills,
-  })
+  const { isCrisis, reasons } = useCrisisMode({ cashAmount, bills })
 
   const cashColor = cashAmount < 500 ? 'text-crisis' : cashAmount < 2000 ? 'text-yellow-400' : 'text-green-400'
   const totalObligations = bills.reduce((sum, b) => b.status !== 'paid' ? sum + b.amount : sum, 0)
   const survivalDays = totalObligations > 0 ? Math.floor(cashAmount / (totalObligations / 30)) : 999
+
+  const allDone = checked.length === NON_NEGOTIABLES.length
 
   return (
     <div>
       <CrisisBanner isCrisis={isCrisis} reasons={reasons} />
 
       <div className="px-4 py-6 space-y-5">
+        {/* 5 Non-Negotiables */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted flex items-center gap-1.5">
+              <CheckCircle size={10} />
+              5 Non-Negotiables
+            </p>
+            <p className={clsx('text-[10px] font-medium', allDone ? 'text-accent' : 'text-text-muted')}>
+              {checked.length}/5 {allDone ? '— Done' : ''}
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            {NON_NEGOTIABLES.map(nn => (
+              <button
+                key={nn.id}
+                onClick={() => toggleNN(nn.id)}
+                className={clsx(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all text-left',
+                  checked.includes(nn.id)
+                    ? 'border-accent/30 bg-accent/5'
+                    : 'border-border bg-surface'
+                )}
+              >
+                <div className={clsx(
+                  'w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all',
+                  checked.includes(nn.id) ? 'border-accent bg-accent' : 'border-border'
+                )}>
+                  {checked.includes(nn.id) && <CheckCircle size={11} className="text-[#020202]" />}
+                </div>
+                <div className="flex-1">
+                  <p className={clsx('text-sm transition-all', checked.includes(nn.id) ? 'text-text-muted line-through' : 'text-text-primary')}>
+                    {nn.label}
+                  </p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{nn.sub}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Status Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -92,7 +157,7 @@ export default function CommandPage() {
           </div>
         </Card>
 
-        {/* Threats Grid */}
+        {/* Threats */}
         {demoData.threats.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-crisis mb-2 flex items-center gap-1.5">
@@ -123,7 +188,7 @@ export default function CommandPage() {
           </div>
         )}
 
-        {/* Opportunities Grid */}
+        {/* Opportunities */}
         {demoData.opportunities.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-accent mb-2 flex items-center gap-1.5">
@@ -174,7 +239,7 @@ export default function CommandPage() {
           </div>
         </div>
 
-        {/* Today's Reminders */}
+        {/* Reminders */}
         {reminders.length > 0 && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Reminders</p>
@@ -212,7 +277,7 @@ export default function CommandPage() {
                   'px-3 py-1.5 rounded-lg border text-sm transition-all duration-150',
                   emotionalState === opt.value
                     ? 'border-accent/60 bg-accent/10 text-accent'
-                    : 'border-border text-text-muted hover:border-border hover:text-text-secondary'
+                    : 'border-border text-text-muted hover:text-text-secondary'
                 )}
               >
                 {opt.label}
@@ -226,24 +291,10 @@ export default function CommandPage() {
           )}
         </div>
 
-        {/* AI Recommendations */}
-        <div>
-          <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">AI Analysis</p>
-          <Card variant="glass" className="p-4">
-            <p className="text-text-muted text-sm italic">
-              AI insights will appear here once configured. In live mode, the system will analyze patterns and surface actionable intelligence.
-            </p>
-          </Card>
-        </div>
-
         {/* Offline Packet */}
         <div>
           <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Survival Packet</p>
-          <OfflinePacket
-            offlineData={offlineData}
-            isOffline={isOffline}
-            lastSynced={lastSynced}
-          />
+          <OfflinePacket offlineData={offlineData} isOffline={isOffline} lastSynced={lastSynced} />
         </div>
       </div>
     </div>

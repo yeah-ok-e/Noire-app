@@ -5,9 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   DollarSign,
-  TrendingUp,
   Gem,
-  Archive,
   Home,
   Heart,
   Calendar,
@@ -19,9 +17,7 @@ import { clsx } from 'clsx'
 const navItems = [
   { label: 'Command', href: '/command', Icon: LayoutDashboard },
   { label: 'Money', href: '/money', Icon: DollarSign },
-  { label: 'Income', href: '/income', Icon: TrendingUp },
   { label: 'Noire', href: '/noire', Icon: Gem },
-  { label: 'Artifacts', href: '/artifacts', Icon: Archive },
   { label: 'Family', href: '/family', Icon: Home },
   { label: 'Body', href: '/body', Icon: Heart },
   { label: 'Calendar', href: '/calendar', Icon: Calendar },
