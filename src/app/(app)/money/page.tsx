@@ -154,7 +154,7 @@ const WEALTH_MILESTONES = [
 
 export default function MoneyPage() {
   const { store, getCurrentCash, addBill, addDebt, addCashUpdate, demoData } = useDemoMode()
-  const [activeTab, setActiveTab] = useState<'overview' | 'bills' | 'income' | 'assistance' | 'agents' | 'vision'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'bills' | 'income' | 'vision'>('overview')
   const [selectedAgent, setSelectedAgent] = useState<typeof MONEY_AGENTS[0] | null>(null)
   const [addModal, setAddModal] = useState<'bill' | 'debt' | 'cash' | 'income' | 'application' | 'assistance' | null>(null)
   const [incomeSources, setIncomeSources] = useState(demoData.incomeSources)
@@ -211,7 +211,7 @@ export default function MoneyPage() {
 
       {/* Tabs */}
       <div className="flex overflow-x-auto scrollbar-none gap-1 bg-surface-2 rounded-lg p-1">
-        {(['overview', 'bills', 'income', 'assistance', 'agents', 'vision'] as const).map(tab => (
+        {(['overview', 'bills', 'income', 'vision'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -405,75 +405,40 @@ export default function MoneyPage() {
         </div>
       )}
 
-      {/* Assistance */}
-      {activeTab === 'assistance' && (
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <p className="text-[10px] uppercase tracking-widest text-text-muted">Assistance Programs</p>
-            <button onClick={() => setAddModal('assistance')} className="flex items-center gap-1 text-xs text-accent">
-              <Plus size={10} />Add
-            </button>
-          </div>
-          {assistancePrograms.map(prog => (
-            <Card key={prog.id} variant="opportunity" className="p-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-text-primary font-medium">{prog.program_name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] uppercase text-text-muted">{prog.type}</span>
-                    <StatusBadge status={prog.status} />
-                  </div>
-                  {prog.appointment_date && (
-                    <p className="text-xs text-accent mt-1">Appt: {formatDate(prog.appointment_date)}</p>
-                  )}
-                  {prog.note && <p className="text-xs text-text-muted mt-1">{prog.note}</p>}
-                </div>
-                {prog.amount && <p className="text-accent font-medium">{formatCurrency(prog.amount)}</p>}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Agents */}
-      {activeTab === 'agents' && (
-        <div className="space-y-4">
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-1">AI Wealth Agents</p>
-            <p className="text-xs text-text-muted mb-4">Autonomous agents managing every layer of your financial life. Tap to brief.</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {MONEY_AGENTS.map(agent => {
-              const AgentIcon = agent.Icon
-              return (
-                <button
-                  key={agent.code}
-                  onClick={() => setSelectedAgent(agent)}
-                  className="bg-surface border border-[#1c1c1c] rounded-xl p-4 text-left hover:border-[#2a2a2a] transition-colors relative"
-                >
-                  {agent.pulse && (
-                    <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  )}
-                  <AgentIcon size={18} style={{ color: agent.color }} className="mb-2" />
-                  <p className="text-sm font-medium" style={{ color: agent.color }}>{agent.code}</p>
-                  <p className="text-[9px] text-text-muted uppercase tracking-wider mt-0.5">{agent.dept}</p>
-                  <p className="text-[10px] text-text-muted mt-2 leading-relaxed line-clamp-2">{agent.status}</p>
-                </button>
-              )
-            })}
-          </div>
-          <div className="bg-surface border border-accent/10 rounded-xl p-4">
-            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Collective Status</p>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              All agents operating in concert. Crypto averaging in. Stocks holding. Assets tracked. Shield monitoring liquidity. No action required — agents will surface opportunities and risks as they emerge.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Vision */}
       {activeTab === 'vision' && (
         <div className="space-y-6">
+          {/* AI Wealth Agents — scrollable block */}
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-1">AI Wealth Agents</p>
+            <p className="text-xs text-text-muted mb-3">Autonomous agents managing every layer of your financial life.</p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+              {MONEY_AGENTS.map(agent => {
+                const AgentIcon = agent.Icon
+                return (
+                  <button
+                    key={agent.code}
+                    onClick={() => setSelectedAgent(agent)}
+                    className="flex-shrink-0 w-44 bg-[#0a0a0a] border border-[#1c1c1c] rounded-xl p-4 text-left hover:border-[#2a2a2a] transition-colors relative"
+                  >
+                    {agent.pulse && (
+                      <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    )}
+                    <AgentIcon size={18} style={{ color: agent.color }} className="mb-2" />
+                    <p className="text-sm font-medium" style={{ color: agent.color }}>{agent.code}</p>
+                    <p className="text-[9px] text-text-muted uppercase tracking-wider mt-0.5">{agent.dept}</p>
+                    <p className="text-[10px] text-text-muted mt-2 leading-relaxed line-clamp-3">{agent.status}</p>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="bg-surface border border-accent/10 rounded-xl p-4 mt-3">
+              <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Collective Status</p>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                All agents operating in concert. Crypto averaging in. Stocks holding. Assets tracked. Shield monitoring liquidity.
+              </p>
+            </div>
+          </div>
           {/* Impact Allocation */}
           <div>
             <div className="flex justify-between items-center mb-3">

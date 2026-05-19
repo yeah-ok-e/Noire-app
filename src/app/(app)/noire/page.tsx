@@ -2,20 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
-
-function NoireLogoMark({ size = 52, className }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 52 52" fill="none" className={className}>
-      {/* Corner brackets */}
-      <path d="M2 14V2H14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M38 2H50V14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M2 38V50H14" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M38 50H50V38" stroke="#d4af7a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      {/* N letterform */}
-      <path d="M16 36V16L36 36V16" stroke="#f0ede8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -25,6 +11,70 @@ import { useDemoMode } from '@/lib/hooks/useDemoMode'
 import { formatCurrency } from '@/lib/utils/formatters'
 import { clsx } from 'clsx'
 import type { FormField } from '@/types/app'
+
+function starPoints(cx: number, cy: number, R: number, r: number): string {
+  const pts: string[] = []
+  for (let i = 0; i < 10; i++) {
+    const a = (i * Math.PI) / 5 - Math.PI / 2
+    const rad = i % 2 === 0 ? R : r
+    pts.push(`${(cx + rad * Math.cos(a)).toFixed(1)},${(cy + rad * Math.sin(a)).toFixed(1)}`)
+  }
+  return pts.join(' ')
+}
+
+function NoireLogoBadge({ size = 120, className }: { size?: number; className?: string }) {
+  const fg = '#ffffff'
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <path id="noire-arc-top" d="M 22,100 A 78,78 0 0,1 178,100" />
+      </defs>
+      {/* Outer ring */}
+      <circle cx="100" cy="100" r="93" stroke={fg} strokeWidth="7" fill="none" />
+      {/* Inner ring */}
+      <circle cx="100" cy="100" r="79" stroke={fg} strokeWidth="1.5" fill="none" />
+      {/* Bottom filled banner */}
+      <path d="M 41,141 A 68,68 0 0,0 159,141 L 158,151 A 76,76 0 0,1 42,151 Z" fill={fg} />
+      {/* NOIRE curved text */}
+      <text fill={fg} fontSize="20" fontWeight="900" letterSpacing="5" fontFamily="'Arial Black', Arial, sans-serif">
+        <textPath href="#noire-arc-top" startOffset="50%" textAnchor="middle">NOIRE</textPath>
+      </text>
+      {/* MMXVII — left, rotated */}
+      <text fill={fg} fontSize="8" fontWeight="700" letterSpacing="2" fontFamily="Arial, sans-serif"
+        textAnchor="middle" transform="translate(32,100) rotate(-90)">MMXVII</text>
+      {/* MMXXVI — right, rotated */}
+      <text fill={fg} fontSize="8" fontWeight="700" letterSpacing="2" fontFamily="Arial, sans-serif"
+        textAnchor="middle" transform="translate(168,100) rotate(90)">MMXXVI</text>
+      {/* Compass rose — N point */}
+      <polygon points="100,51 103.5,93 100,100 96.5,93" fill={fg} />
+      {/* S point */}
+      <polygon points="100,149 103.5,107 100,100 96.5,107" fill={fg} />
+      {/* E point */}
+      <polygon points="149,100 107,103.5 100,100 107,96.5" fill={fg} />
+      {/* W point */}
+      <polygon points="51,100 93,103.5 100,100 93,96.5" fill={fg} />
+      {/* NE diagonal */}
+      <polygon points="129,71 104,97 100,100 103,96" fill={fg} />
+      {/* NW diagonal */}
+      <polygon points="71,71 96,97 100,100 97,96" fill={fg} />
+      {/* SE diagonal */}
+      <polygon points="129,129 104,103 100,100 103,104" fill={fg} />
+      {/* SW diagonal */}
+      <polygon points="71,129 96,103 100,100 97,104" fill={fg} />
+      {/* Four quadrant stars */}
+      <polygon points={starPoints(67, 67, 6, 2.5)} fill={fg} />
+      <polygon points={starPoints(133, 67, 6, 2.5)} fill={fg} />
+      <polygon points={starPoints(67, 129, 6, 2.5)} fill={fg} />
+      <polygon points={starPoints(133, 129, 6, 2.5)} fill={fg} />
+      {/* Banner stars (5 — dark on light banner) */}
+      <polygon points={starPoints(70, 145, 4, 1.8)} fill="black" />
+      <polygon points={starPoints(84, 145, 4, 1.8)} fill="black" />
+      <polygon points={starPoints(100, 145, 4, 1.8)} fill="black" />
+      <polygon points={starPoints(116, 145, 4, 1.8)} fill="black" />
+      <polygon points={starPoints(130, 145, 4, 1.8)} fill="black" />
+    </svg>
+  )
+}
 
 const SEASONS = [
   {
@@ -58,14 +108,46 @@ const SEASONS = [
 ]
 
 const AGENTS = [
-  { code: 'CEO', color: '#d4af7a', status: 'Brand vision aligned — 2 decisions pending review', dept: 'Executive', pulse: true },
-  { code: 'CMO', color: '#a78bfa', status: 'Drop announcement sequence drafted — ready to deploy', dept: 'Marketing', pulse: true },
-  { code: 'CRO', color: '#facc15', status: '3 hot leads in pipeline — follow-up due Thursday', dept: 'Revenue', pulse: true },
-  { code: 'CCO', color: '#f472b6', status: 'Origin Series mockups in progress — est. 5 days', dept: 'Creative', pulse: false },
-  { code: 'CFO', color: '#4ade80', status: 'Margin analysis complete — recommend $285 price point', dept: 'Finance', pulse: false },
-  { code: 'COO', color: '#f0ede8', status: 'Fulfillment workflow mapped — awaiting first bulk order', dept: 'Operations', pulse: false },
-  { code: 'CBO', color: '#d4af7a', status: 'Identity guide v2 — 80% complete', dept: 'Brand', pulse: false },
-  { code: 'CTO', color: '#60a5fa', status: 'Shopify store optimization queued', dept: 'Technology', pulse: false },
+  {
+    code: 'CEO', color: '#d4af7a', status: 'Brand vision aligned — 2 decisions pending review', dept: 'Executive', pulse: true,
+    approvals: ['Approve direction for Pressure Era campaign messaging', 'Review long-term brand equity positioning'],
+    needToKnow: ['Origin Series needs a drop date confirmed by May 15', 'Legal structure for Noire LLC should be finalized before revenue crosses $10k', 'First hire: creative director is the highest-leverage move when ready'],
+  },
+  {
+    code: 'CMO', color: '#a78bfa', status: 'Drop announcement sequence drafted — ready to deploy', dept: 'Marketing', pulse: true,
+    approvals: ['Approve announcement copy for Origin Series hoodie', 'Review 3-post Instagram sequence before deploy'],
+    needToKnow: ['The story is the marketing. Every post should add to the mythology, not just announce product', 'Timing: Tuesday and Thursday posts perform 40% above average for luxury streetwear', '@noireuniform needs 2–3 posts/week minimum to maintain algorithm momentum'],
+  },
+  {
+    code: 'CRO', color: '#facc15', status: '3 hot leads in pipeline — follow-up due Thursday', dept: 'Revenue', pulse: true,
+    approvals: ['Approve lead outreach template for 3 hot contacts', 'Review pricing strategy for bulk/wholesale inquiries'],
+    needToKnow: ['All 3 hot leads require personal follow-up, not automated messages — they respond to authenticity', 'Current conversion rate: 34%. Industry benchmark is 20%. You\'re above it.', 'Bundle pricing ($195 hoodie + $65 tee = $240 bundle) could increase AOV significantly'],
+  },
+  {
+    code: 'CCO', color: '#f472b6', status: 'Origin Series mockups in progress — est. 5 days', dept: 'Creative', pulse: false,
+    approvals: ['Review Origin Series mockup round 1 when complete', 'Approve brand color usage for Fall collection direction'],
+    needToKnow: ['The creative direction should always answer: "What does this say about who we are 10 years from now?"', 'Current color palette is strong. Don\'t dilute it with seasonal color trends.', 'Lookbook concept for Emergence should incorporate the city — this is a movement, not just a brand'],
+  },
+  {
+    code: 'CFO', color: '#4ade80', status: 'Margin analysis complete — recommend $285 price point', dept: 'Finance', pulse: false,
+    approvals: ['Review pricing recommendation ($285 vs $215 current)', 'Approve reinvestment allocation for next production run'],
+    needToKnow: ['At $285, margin is 67%. At $215, margin is 54%. The price increase is fully justified by brand positioning.', 'First production run should be 9–12 units. Scarcity is the mechanism.', 'Reinvest 60% of every sale back into production until you hit 3 drops/year cadence'],
+  },
+  {
+    code: 'COO', color: '#f0ede8', status: 'Fulfillment workflow mapped — awaiting first bulk order', dept: 'Operations', pulse: false,
+    approvals: ['Approve supplier contract terms for next production run', 'Review fulfillment timeline for Origin Series'],
+    needToKnow: ['Lead time from current supplier: 18–21 days. Plan drops accordingly.', 'Photography and product content should be created in the same session as sampling — efficiency.', 'Packaging is part of the experience. The unboxing should feel like opening something rare.'],
+  },
+  {
+    code: 'CBO', color: '#d4af7a', status: 'Identity guide v2 — 80% complete', dept: 'Brand', pulse: false,
+    approvals: ['Review identity guide v2 when complete', 'Approve brand voice document for team use'],
+    needToKnow: ['Brand voice: composed, assured, deliberate. Never desperate. Never discounting.', 'Every brand touchpoint — from DMs to packaging — should feel like the brand you want to be at $50M revenue.', 'The visual identity is strong. Guard it. Deviation is dilution.'],
+  },
+  {
+    code: 'CTO', color: '#60a5fa', status: 'Shopify store optimization queued', dept: 'Technology', pulse: false,
+    approvals: ['Approve Shopify theme update direction', 'Review checkout flow optimization plan'],
+    needToKnow: ['Current store conversion rate needs mobile optimization — 70%+ of traffic is mobile', 'Email capture at checkout should be prioritized — the list is the long-term asset', 'Product page copy needs to reflect the brand voice. Feature descriptions are not enough.'],
+  },
 ]
 
 const CONTENT_PIPELINE = [
@@ -75,6 +157,9 @@ const CONTENT_PIPELINE = [
   { title: 'Origin Story Documentary', lane: 'film', status: 'production', format: 'Film' },
   { title: 'Season Lookbook', lane: 'visual', status: 'production', format: 'Photo' },
   { title: 'Brand Story Video Script', lane: 'short-form', status: 'draft', format: 'Video' },
+  { title: 'Cover Art — Pressure Era', lane: 'visual', status: 'ready', format: 'Visual' },
+  { title: 'Box & Packaging Design', lane: 'visual', status: 'review', format: 'Design' },
+  { title: 'Noire Canvas Print — Limited', lane: 'visual', status: 'draft', format: 'Art' },
 ]
 
 const STATUS_COLORS: Record<string, string> = {
@@ -83,6 +168,14 @@ const STATUS_COLORS: Record<string, string> = {
   production: 'text-blue-400 border-blue-400/30 bg-blue-400/10',
   draft: 'text-text-muted border-border bg-surface-2',
 }
+
+const VISION_LINES = [
+  "The culture doesn't need another label. It needs a covenant. Noire is that covenant.",
+  "Every piece ships carrying the weight of what we overcame to make it. That energy can't be manufactured.",
+  "One day someone will recognize a stranger wearing Noire and feel exactly what we felt building it.",
+  "We don't chase trend cycles. We set reference points. Future designers will trace their lineage back here.",
+  "The brand is the autobiography written in fabric. Every drop a chapter no one else has the right to tell.",
+]
 
 const leadFields: FormField[] = [
   { name: 'name', label: 'Name', type: 'text', placeholder: 'Customer name', required: true },
@@ -120,8 +213,8 @@ export default function NoirePage() {
       return
     }
     sessionStorage.setItem('noire-entrance', '1')
-    const t1 = setTimeout(() => setEntranceDone(true), 2800)
-    const t2 = setTimeout(() => setContentReady(true), 3200)
+    const t1 = setTimeout(() => setEntranceDone(true), 3200)
+    const t2 = setTimeout(() => setContentReady(true), 3600)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
 
@@ -133,36 +226,28 @@ export default function NoirePage() {
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6"
             style={{ background: '#020202' }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.85 }}
+              initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
             >
-              <NoireLogoMark size={64} />
+              <NoireLogoBadge size={140} />
             </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, letterSpacing: '0.05em' }}
-              animate={{ opacity: 1, letterSpacing: '0.55em' }}
-              transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl font-light text-[#f0ede8] uppercase"
-            >
-              NOIRE
-            </motion.h1>
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: '80px' }}
-              transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
+              animate={{ width: '60px' }}
+              transition={{ duration: 1.2, delay: 1, ease: 'easeOut' }}
               className="h-px bg-[#d4af7a]"
             />
             <motion.p
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 0.4, y: 0 }}
-              transition={{ duration: 1, delay: 1.2 }}
-              className="text-[10px] uppercase tracking-[0.5em] text-[#888] mt-5"
+              transition={{ duration: 1, delay: 1.5 }}
+              className="text-[10px] uppercase tracking-[0.5em] text-[#888]"
             >
               Identity Architecture
             </motion.p>
@@ -178,11 +263,11 @@ export default function NoirePage() {
         className="px-4 py-6 space-y-8"
       >
         {/* Header */}
-        <div className="flex items-end justify-between">
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] uppercase tracking-[0.5em] text-[#d4af7a]/60 mb-2">Identity Architecture</p>
             <div className="flex items-center gap-3">
-              <NoireLogoMark size={36} />
+              <NoireLogoBadge size={44} />
               <h1 className="text-3xl font-light tracking-[0.3em] text-[#f0ede8] uppercase">NOIRE</h1>
             </div>
           </div>
@@ -359,13 +444,7 @@ export default function NoirePage() {
         <div className="bg-[#0a0a0a] border border-[#d4af7a]/10 rounded-xl p-6">
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af7a]/50 mb-5">The Vision</p>
           <div className="space-y-3">
-            {[
-              'Cortiez-level hysteria. Drake-level anticipation. A loving, legendary community.',
-              'Every drop is performance art. Every moment documented — films, books, posts, montages, think pieces.',
-              'Remembered across generations. Across timelines. Like Genghis Khan, Mother Theresa, MJ.',
-              'The community is an extension of the family. Every purchase is a moment. Once-in-a-lifetime energy.',
-              'The brand is the score to the story. Every collection, a chapter. Every campaign, a movement.',
-            ].map((line, i) => (
+            {VISION_LINES.map((line, i) => (
               <p key={i} className="text-xs text-[#555] leading-relaxed flex items-start gap-3">
                 <span className="text-[#d4af7a]/40 mt-0.5 flex-shrink-0">◆</span>
                 {line}
@@ -378,12 +457,40 @@ export default function NoirePage() {
       {/* Agent Detail Modal */}
       <Modal isOpen={!!selectedAgent} onClose={() => setSelectedAgent(null)} title={selectedAgent ? `${selectedAgent.code} — ${selectedAgent.dept}` : ''}>
         {selectedAgent && (
-          <div className="space-y-4">
-            <p className="text-4xl font-serif" style={{ color: selectedAgent.color }}>{selectedAgent.code}</p>
-            <p className="text-text-secondary text-sm">{selectedAgent.status}</p>
-            <div className="flex items-center gap-2">
-              <span className={clsx('w-2 h-2 rounded-full', selectedAgent.pulse ? 'bg-green-400 animate-pulse' : 'bg-text-muted')} />
-              <span className="text-[10px] text-text-muted uppercase tracking-wider">{selectedAgent.pulse ? 'Active' : 'Idle'}</span>
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <p className="text-4xl font-serif" style={{ color: selectedAgent.color }}>{selectedAgent.code}</p>
+              <div className="ml-auto flex items-center gap-2">
+                <span className={clsx('w-2 h-2 rounded-full', selectedAgent.pulse ? 'bg-green-400 animate-pulse' : 'bg-[#3a3a3a]')} />
+                <span className="text-[10px] text-text-muted uppercase tracking-wider">{selectedAgent.pulse ? 'Active' : 'Idle'}</span>
+              </div>
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed border-l-2 border-accent/30 pl-3">{selectedAgent.status}</p>
+
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2 flex items-center gap-1.5">
+                ◆ Approvals Needed
+              </p>
+              <div className="space-y-2">
+                {selectedAgent.approvals.map((a, i) => (
+                  <div key={i} className="flex items-start gap-2.5 p-3 bg-surface-2 rounded-lg border border-accent/15">
+                    <span className="text-accent text-[10px] mt-0.5 flex-shrink-0">→</span>
+                    <p className="text-xs text-text-secondary">{a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Need to Know</p>
+              <div className="space-y-2">
+                {selectedAgent.needToKnow.map((n, i) => (
+                  <p key={i} className="text-xs text-text-muted flex items-start gap-2">
+                    <span className="text-[#d4af7a]/50 flex-shrink-0 mt-0.5">◆</span>
+                    {n}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         )}
