@@ -291,7 +291,6 @@ export default function NoirePage() {
           <div>
             <p className="text-[10px] uppercase tracking-[0.5em] text-[#d4af7a]/60 mb-2">Identity Architecture</p>
             <div className="flex items-center gap-3">
-              <NoireLogoBadge size={44} />
               <h1 className="text-3xl font-light tracking-[0.3em] text-[#f0ede8] uppercase">NOIRE</h1>
             </div>
           </div>

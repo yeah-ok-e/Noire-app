@@ -73,7 +73,7 @@ input:focus, textarea:focus, select:focus {
 /* Page content offset for fixed header + nav */
 .page-content {
   padding-top: 56px;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   min-height: 100dvh;
 }
 

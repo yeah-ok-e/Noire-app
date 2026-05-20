@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Fingerprint } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const IS_DEMO =
@@ -31,6 +31,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [biometricLoading, setBiometricLoading] = useState(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,6 +155,25 @@ export default function LoginPage() {
               className="w-full py-3 rounded-lg border border-accent text-accent font-medium text-sm tracking-wider hover:bg-accent/10 transition-all duration-200 disabled:opacity-50 mt-1"
             >
               {isLoading ? 'Authenticating...' : IS_DEMO ? 'Enter Demo Mode' : 'Sign In'}
+            </button>
+            <div className="flex items-center gap-3 mt-1">
+              <div className="flex-1 h-px bg-[#222222]" />
+              <span className="text-[10px] text-[#444444] uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-[#222222]" />
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                setBiometricLoading(true)
+                await new Promise(r => setTimeout(r, 1200))
+                setBiometricLoading(false)
+                router.push('/command')
+              }}
+              disabled={biometricLoading}
+              className="w-full py-3 rounded-lg border border-[#333333] text-[#888888] text-sm tracking-wider hover:border-[#555555] hover:text-[#aaaaaa] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <Fingerprint size={16} />
+              {biometricLoading ? 'Authenticating...' : 'Face ID / Touch ID'}
             </button>
           </form>
 

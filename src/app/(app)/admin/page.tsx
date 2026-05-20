@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { RotateCcw, Shield, Download, AlertCircle, CheckCircle, Activity, Plus, Search, Archive, FileText, Image, Film, Mic, Receipt, Trash2, Link2, RefreshCw, Lock } from 'lucide-react'
+import { RotateCcw, Shield, Download, AlertCircle, CheckCircle, Activity, Plus, Search, Archive, FileText, Image, Film, Mic, Receipt, Trash2, Link2, RefreshCw, Lock, Upload } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Modal } from '@/components/ui/Modal'
@@ -106,6 +106,74 @@ const LINKED_ACCOUNTS = [
   },
 ]
 
+const FOOTPRINT_SCAN = {
+  lastScan: new Date(Date.now() - 2 * 3600000).toISOString(),
+  score: 72, // lower = better (less exposed)
+  exposures: [
+    { id: 'fp1', type: 'email', value: 'e***h@gmail.com', source: 'Data broker — Spokeo', risk: 'medium', suppressed: false },
+    { id: 'fp2', type: 'address', value: '******* St, Philadelphia PA', source: 'Whitepages', risk: 'high', suppressed: false },
+    { id: 'fp3', type: 'phone', value: '+1 (215) ***-****', source: 'BeenVerified', risk: 'high', suppressed: true },
+    { id: 'fp4', type: 'name+city', value: 'Eligah Lewis, Philadelphia', source: 'MyLife.com', risk: 'medium', suppressed: false },
+    { id: 'fp5', type: 'social', value: '@yeah.ok.e — linked to real name', source: 'TruthFinder', risk: 'low', suppressed: false },
+  ]
+}
+
+const REAL_GOALS = [
+  {
+    id: 'g1',
+    label: 'Cash Reserve',
+    target: 2000,
+    unit: '$',
+    description: 'Emergency buffer — 30 days covered',
+    category: 'money',
+    color: '#d4af7a',
+    transactions: [
+      { date: '2026-05-18', amount: 234, note: 'UC deposit — allocated to reserve' },
+      { date: '2026-05-10', amount: 100, note: 'Cash App transfer to savings' },
+      { date: '2026-05-03', amount: 50, note: 'Rolled over bill savings' },
+    ],
+  },
+  {
+    id: 'g2',
+    label: 'Noire Revenue',
+    target: 10000,
+    unit: '$',
+    description: 'Pressure Era milestone — first $10k',
+    category: 'noire',
+    color: '#a78bfa',
+    transactions: [
+      { date: '2026-05-19', amount: 215, note: 'Origin Series hoodie — 1 unit sold' },
+      { date: '2026-05-12', amount: 195, note: 'Origin Series hoodie — 1 unit' },
+      { date: '2026-05-01', amount: 195, note: 'Pre-order — hoodie' },
+    ],
+  },
+  {
+    id: 'g3',
+    label: 'Debt Cleared',
+    target: 3200,
+    unit: '$',
+    description: 'Total high-interest debt — eliminate',
+    category: 'money',
+    color: '#ef4444',
+    transactions: [
+      { date: '2026-05-15', amount: 80, note: 'ConEd partial payment' },
+      { date: '2026-05-01', amount: 120, note: 'Rent arrears — partial' },
+    ],
+  },
+  {
+    id: 'g4',
+    label: 'Noire Drops',
+    target: 6,
+    unit: 'drops',
+    description: 'Drops completed in 2026',
+    category: 'noire',
+    color: '#22c55e',
+    transactions: [
+      { date: '2026-05-30', amount: 1, note: 'Origin Series Hoodie — LIVE' },
+    ],
+  },
+]
+
 const DEMO_ARTIFACTS: Partial<Artifact>[] = [
   { id: 'art-1', title: 'LIHEAP Application Copy', type: 'document', category: 'assistance', tags: ['liheap', 'utilities', 'assistance'], ai_summary: 'Energy assistance application — submitted. Appointment confirmed.', created_at: new Date(Date.now() - 2 * 86400000).toISOString(), updated_at: new Date().toISOString() },
   { id: 'art-2', title: 'Meineke Fuel Pump Quote', type: 'receipt', category: 'car', tags: ['car', 'meineke', 'repair'], ai_summary: 'Fuel pump replacement quote — $980 parts + labor.', created_at: new Date(Date.now() - 7 * 86400000).toISOString(), updated_at: new Date().toISOString() },
@@ -114,7 +182,7 @@ const DEMO_ARTIFACTS: Partial<Artifact>[] = [
 
 export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState(DEMO_AUDIT_LOGS)
-  const [activeTab, setActiveTab] = useState<'audit' | 'errors' | 'permissions' | 'ai' | 'artifacts' | 'connections'>('audit')
+  const [activeTab, setActiveTab] = useState<'audit' | 'errors' | 'permissions' | 'ai' | 'artifacts' | 'connections' | 'footprint' | 'goals'>('audit')
   const [syncingAccount, setSyncingAccount] = useState<string | null>(null)
   const [rolledBack, setRolledBack] = useState<string[]>([])
   const [artifacts, setArtifacts] = useState<Partial<Artifact>[]>(DEMO_ARTIFACTS)
@@ -127,6 +195,10 @@ export default function AdminPage() {
   const [newType, setNewType] = useState('')
   const [newTags, setNewTags] = useState('')
   const [newSummary, setNewSummary] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [aiProcessing, setAiProcessing] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const [exposures, setExposures] = useState(FOOTPRINT_SCAN.exposures)
 
   const handleExport = () => {
     const data = { exported_at: new Date().toISOString(), audit_logs: auditLogs, note: 'LEGACY OS data export — demo mode' }
@@ -169,6 +241,13 @@ export default function AdminPage() {
         <p className="text-xs text-accent font-medium">Demo Mode Active</p>
         <p className="text-[10px] text-text-muted mt-0.5">Connect Supabase to enable live sync, persistent data, and full audit logging.</p>
       </div>
+      <a href="/privacy" className="flex items-center justify-between px-4 py-3 bg-surface border border-border rounded-lg hover:border-accent/40 transition-colors group">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          <p className="text-xs text-text-secondary group-hover:text-accent transition-colors">Trust Architecture & Security</p>
+        </div>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted group-hover:text-accent"/></svg>
+      </a>
 
       {/* System Status */}
       <div className="grid grid-cols-2 gap-2">
@@ -196,7 +275,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex border-b border-border overflow-x-auto scrollbar-none">
-        {(['audit', 'errors', 'permissions', 'ai', 'artifacts', 'connections'] as const).map(tab => (
+        {(['audit', 'errors', 'permissions', 'ai', 'artifacts', 'connections', 'footprint', 'goals'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -407,6 +486,137 @@ export default function AdminPage() {
         </div>
       )}
 
+      {activeTab === 'footprint' && (
+        <div className="space-y-5">
+          {/* Score Circle */}
+          <div className="flex flex-col items-center py-6">
+            <div className={clsx(
+              'w-28 h-28 rounded-full flex flex-col items-center justify-center border-4',
+              FOOTPRINT_SCAN.score > 70 ? 'border-crisis bg-crisis/10' :
+              FOOTPRINT_SCAN.score > 40 ? 'border-yellow-400 bg-yellow-400/10' :
+              'border-green-400 bg-green-400/10'
+            )}>
+              <span className={clsx(
+                'text-3xl font-bold',
+                FOOTPRINT_SCAN.score > 70 ? 'text-crisis' :
+                FOOTPRINT_SCAN.score > 40 ? 'text-yellow-400' :
+                'text-green-400'
+              )}>{FOOTPRINT_SCAN.score}</span>
+              <span className="text-[9px] uppercase tracking-widest text-text-muted mt-0.5">Exposure</span>
+            </div>
+            <p className="text-[10px] text-text-muted mt-3">Last scan: {formatRelativeTime(FOOTPRINT_SCAN.lastScan)}</p>
+            <p className="text-[10px] text-text-muted/60 mt-0.5">Lower score = less exposed</p>
+            <button
+              onClick={() => { setScanning(true); setTimeout(() => setScanning(false), 2000) }}
+              className={clsx(
+                'mt-4 px-5 py-2 rounded-lg border text-xs font-medium transition-all',
+                scanning ? 'border-accent/40 text-accent animate-pulse' : 'border-border text-text-secondary hover:border-accent/40 hover:text-accent'
+              )}
+            >
+              {scanning ? 'Scanning...' : 'Run Scan'}
+            </button>
+          </div>
+
+          {/* Exposures List */}
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted mb-3">{exposures.length} exposures detected</p>
+            <div className="space-y-2">
+              {exposures.map(exp => (
+                <div key={exp.id} className={clsx('bg-surface border rounded-lg p-3', exp.suppressed ? 'border-border opacity-60' : 'border-border')}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-surface-2 border border-border text-text-muted uppercase tracking-wider">{exp.type}</span>
+                        <span className={clsx('text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-medium',
+                          exp.risk === 'high' ? 'bg-crisis/15 text-crisis' :
+                          exp.risk === 'medium' ? 'bg-yellow-500/15 text-yellow-400' :
+                          'text-text-muted'
+                        )}>{exp.risk}</span>
+                        {exp.suppressed && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/15 text-green-400 uppercase tracking-wider">Suppressed</span>
+                        )}
+                      </div>
+                      <p className={clsx('text-sm text-text-primary font-mono', exp.suppressed && 'line-through')}>{exp.value}</p>
+                      <p className="text-[10px] text-text-muted mt-0.5">{exp.source}</p>
+                    </div>
+                    {!exp.suppressed && (
+                      <button
+                        onClick={() => setExposures(prev => prev.map(e => e.id === exp.id ? { ...e, suppressed: true } : e))}
+                        className="flex-shrink-0 text-[10px] px-2 py-1 rounded border border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors"
+                      >
+                        Suppress
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Info Note */}
+          <div className="bg-surface border border-border rounded-lg px-4 py-3">
+            <p className="text-[11px] text-text-secondary leading-relaxed">Alfred&apos;s <span className="text-accent font-medium">SENTINEL</span> agent continuously monitors for new exposures. Suppression requests are queued and processed within 48–72 hours.</p>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'goals' && (
+        <div className="space-y-4">
+          <p className="text-[10px] uppercase tracking-widest text-text-muted">Actual Transactional Progress</p>
+          <p className="text-xs text-text-secondary">Every bar moves only when a real transaction is logged. No theory.</p>
+
+          <div className="space-y-4">
+            {REAL_GOALS.map(goal => {
+              const total = goal.transactions.reduce((s, t) => s + t.amount, 0)
+              const pct = Math.min(Math.round((total / goal.target) * 100), 100)
+              return (
+                <div key={goal.id} className="bg-surface border border-border rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-sm text-text-primary font-medium">{goal.label}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5">{goal.description}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-medium" style={{ color: goal.color }}>
+                        {goal.unit === '$' ? `$${total.toLocaleString()}` : `${total} ${goal.unit}`}
+                      </p>
+                      <p className="text-[10px] text-text-muted">of {goal.unit === '$' ? `$${goal.target.toLocaleString()}` : `${goal.target} ${goal.unit}`}</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="h-2 bg-surface-2 rounded-full overflow-hidden mb-1">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: goal.color }} />
+                  </div>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[10px] text-text-muted">{pct}% complete</span>
+                    <span className="text-[10px]" style={{ color: goal.color }}>
+                      {goal.unit === '$' ? `$${(goal.target - total).toLocaleString()} to go` : `${goal.target - total} to go`}
+                    </span>
+                  </div>
+
+                  {/* Transaction log */}
+                  <div className="space-y-1.5 border-t border-border pt-3">
+                    <p className="text-[9px] uppercase tracking-wider text-text-muted mb-2">Transaction Log</p>
+                    {goal.transactions.map((tx, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-text-secondary truncate">{tx.note}</p>
+                          <p className="text-[9px] text-text-muted">{tx.date}</p>
+                        </div>
+                        <span className="text-[10px] font-medium ml-2 flex-shrink-0" style={{ color: goal.color }}>
+                          +{goal.unit === '$' ? `$${tx.amount}` : `${tx.amount} ${goal.unit}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {activeTab === 'artifacts' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -414,6 +624,43 @@ export default function AdminPage() {
             <button onClick={() => setAddArtifact(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border rounded-lg text-xs text-text-secondary hover:text-accent hover:border-accent/40 transition-all">
               <Plus size={12} />Upload
             </button>
+          </div>
+
+          {/* Drag-Drop Document AI Zone */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault(); setIsDragging(false)
+              const files = Array.from(e.dataTransfer.files)
+              if (files.length > 0) {
+                setAiProcessing(true)
+                setTimeout(() => {
+                  const f = files[0]
+                  setArtifacts(prev => [...prev, {
+                    id: `art-${Date.now()}`,
+                    title: f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+                    type: f.type.startsWith('image') ? 'image' : f.type.includes('pdf') ? 'document' : 'document',
+                    tags: ['uploaded', 'ai-processed'],
+                    ai_summary: `AI-processed: ${f.name}. Document analyzed and categorized automatically.`,
+                    category: null, storage_path: null,
+                    created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+                  }])
+                  setAiProcessing(false)
+                }, 2000)
+              }
+            }}
+            className={clsx('border-2 border-dashed rounded-lg p-6 text-center transition-all mb-4', isDragging ? 'border-accent bg-accent/5' : 'border-border')}
+          >
+            {aiProcessing ? (
+              <p className="text-accent text-xs animate-pulse">AI processing document...</p>
+            ) : (
+              <>
+                <Upload size={20} className="text-text-muted mx-auto mb-2" />
+                <p className="text-xs text-text-muted">Drop a document here for AI analysis</p>
+                <p className="text-[10px] text-text-muted/60 mt-1">Receipt, contract, form, or photo — auto-tagged &amp; summarized</p>
+              </>
+            )}
           </div>
 
           {/* Search + Filter */}

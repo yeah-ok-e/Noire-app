@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   AlertTriangle, TrendingUp, CheckCircle, Circle, ChevronRight, X,
-  Phone, Mail, ExternalLink, FileText, Copy, Check,
+  Phone, Mail, ExternalLink, FileText, Copy, Check, MapPin,
 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -56,6 +56,31 @@ type MoveIntel = {
   deadline: string
   success: string
 }
+
+const ADHERENCE_CATEGORIES = [
+  { id: 'money', label: 'Money Move', sub: 'Check the number. Make a move.', icon: 'DollarSign', color: '#d4af7a' },
+  { id: 'noire', label: 'Noire Move', sub: 'Brand action logged.', icon: 'Gem', color: '#a78bfa' },
+  { id: 'body', label: 'Body', sub: 'Movement completed.', icon: 'Heart', color: '#f97316' },
+  { id: 'family', label: 'Family', sub: 'Connected today.', icon: 'Home', color: '#22c55e' },
+  { id: 'discipline', label: 'Discipline', sub: '5 non-negotiables hit.', icon: 'CheckSquare', color: '#3b82f6' },
+  { id: 'reflection', label: 'Reflection', sub: 'Legacy log made.', icon: 'BookOpen', color: '#ec4899' },
+]
+
+// Demo: simulate 7-day adherence history (1 = done, 0 = missed)
+const ADHERENCE_HISTORY: Record<string, number[]> = {
+  money:      [1, 1, 0, 1, 1, 1, 0],
+  noire:      [1, 0, 1, 1, 1, 0, 1],
+  body:       [0, 1, 1, 1, 0, 1, 1],
+  family:     [1, 1, 1, 0, 1, 1, 1],
+  discipline: [1, 1, 0, 0, 1, 1, 1],
+  reflection: [0, 0, 1, 1, 1, 0, 1],
+}
+
+const NEARBY_FOUNDERS = [
+  { id: 'nf1', name: 'Marcus Webb', title: 'Founder — Webb Creative Co.', distance: '0.8 mi', tags: ['creative agency', 'brand strategy'], mutual: 2, status: 'hot' },
+  { id: 'nf2', name: 'Tanya Osei', title: 'CEO — Elevated Supply Co.', distance: '1.4 mi', tags: ['retail', 'supply chain'], mutual: 1, status: 'warm' },
+  { id: 'nf3', name: 'Derek Fontaine', title: 'Director — Philly Fashion Week', distance: '2.1 mi', tags: ['fashion', 'events', 'media'], mutual: 3, status: 'hot' },
+]
 
 const OPP_INTEL: Record<string, OppIntel> = {
   o1: {
@@ -302,6 +327,7 @@ export default function CommandPage() {
   const { isOffline, lastSynced, offlineData } = useOffline()
   const [emotionalState, setEmotionalState] = useState<string | null>(null)
   const [checked, setChecked] = useState<string[]>([])
+  const [todayChecked, setTodayChecked] = useState<Set<string>>(new Set(['money', 'family']))
   const [affirmationExpanded, setAffirmationExpanded] = useState(false)
   const [selectedOpp, setSelectedOpp] = useState<typeof demoData.opportunities[0] | null>(null)
   const [selectedMove, setSelectedMove] = useState<typeof demoData.nextMoves[0] | null>(null)
@@ -446,6 +472,72 @@ export default function CommandPage() {
           </div>
         </div>
 
+        {/* Adherence Tracker */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">Daily Adherence</p>
+            <div className="flex items-center gap-2">
+              {(() => {
+                const todayScore = Math.round((todayChecked.size / ADHERENCE_CATEGORIES.length) * 100)
+                return (
+                  <span className={clsx('text-xs font-medium', todayScore >= 90 ? 'text-green-400' : todayScore >= 80 ? 'text-accent' : 'text-crisis')}>
+                    {todayScore}% today
+                  </span>
+                )
+              })()}
+              <span className="text-[10px] text-text-muted">Goal: 90%</span>
+            </div>
+          </div>
+
+          {/* Warning if below 80% */}
+          {todayChecked.size / ADHERENCE_CATEGORIES.length < 0.8 && (
+            <div className="mb-3 flex items-center gap-2 px-3 py-2 bg-crisis/10 border border-crisis/30 rounded-lg">
+              <div className="w-1.5 h-1.5 rounded-full bg-crisis animate-pulse flex-shrink-0" />
+              <p className="text-[11px] text-crisis">Below 80% — push to close the gap today.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            {ADHERENCE_CATEGORIES.map(cat => {
+              const history = ADHERENCE_HISTORY[cat.id]
+              const weekRate = Math.round((history.reduce((s, v) => s + v, 0) / history.length) * 100)
+              const done = todayChecked.has(cat.id)
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setTodayChecked(prev => {
+                    const next = new Set(prev)
+                    if (next.has(cat.id)) next.delete(cat.id)
+                    else next.add(cat.id)
+                    return next
+                  })}
+                  className={clsx(
+                    'bg-surface border rounded-xl p-3 text-left transition-all',
+                    done ? 'border-accent/40 bg-accent/5' : weekRate < 80 ? 'border-crisis/30' : 'border-border'
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={clsx('w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all', done ? 'border-accent bg-accent' : 'border-border')} style={done ? {} : { borderColor: cat.color + '60' }}>
+                      {done && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke="#020202" strokeWidth="1.5" fill="none" strokeLinecap="round"/></svg>}
+                    </div>
+                    <span className={clsx('text-[9px] font-medium uppercase tracking-wider', weekRate >= 90 ? 'text-green-400' : weekRate >= 80 ? 'text-accent' : 'text-crisis')}>
+                      {weekRate}% / wk
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-primary font-medium">{cat.label}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{cat.sub}</p>
+                  {/* 7-day mini-bar */}
+                  <div className="flex gap-0.5 mt-2">
+                    {history.map((v, i) => (
+                      <div key={i} className="flex-1 h-1 rounded-full" style={{ backgroundColor: v ? cat.color : '#1c1c1c' }} />
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
         {/* Opportunities */}
         {demoData.opportunities.length > 0 && (
           <div>
@@ -566,6 +658,46 @@ export default function CommandPage() {
           <p className="text-[10px] uppercase tracking-widest text-text-muted mb-2">Survival Packet</p>
           <OfflinePacket offlineData={offlineData} isOffline={isOffline} lastSynced={lastSynced} />
         </div>
+
+        {/* Nearby Connections */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">Nearby Connections</p>
+            <div className="flex items-center gap-1 text-[10px] text-text-muted">
+              <MapPin size={10} />
+              <span>Philadelphia, PA</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {NEARBY_FOUNDERS.map(f => (
+              <div key={f.id} className="bg-surface border border-border rounded-lg p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-text-primary font-medium truncate">{f.name}</p>
+                      <span className={clsx('text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-medium flex-shrink-0',
+                        f.status === 'hot' ? 'bg-accent/15 text-accent' : 'bg-green-500/15 text-green-400'
+                      )}>{f.status}</span>
+                    </div>
+                    <p className="text-[11px] text-text-muted mt-0.5 truncate">{f.title}</p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <span className="text-[10px] text-text-muted flex items-center gap-1"><MapPin size={8} />{f.distance}</span>
+                      <span className="text-[10px] text-text-muted">{f.mutual} mutual</span>
+                    </div>
+                  </div>
+                  <button className="flex-shrink-0 px-2.5 py-1 border border-border rounded text-[10px] text-text-muted hover:border-accent/40 hover:text-accent transition-colors">
+                    Connect
+                  </button>
+                </div>
+                <div className="flex gap-1.5 mt-2 flex-wrap">
+                  {f.tags.map(tag => (
+                    <span key={tag} className="text-[9px] text-text-muted border border-border px-1.5 py-0.5 rounded">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* Opportunity Modal — Full Intel Package */}

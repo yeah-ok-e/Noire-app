@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Search, X, Settings, Calendar } from 'lucide-react'
+import { Search, X, Settings, Calendar, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -73,6 +73,14 @@ function parseCommand(input: string, router: ReturnType<typeof useRouter>): stri
     router.push('/command')
     return 'Navigating to Command Board'
   }
+  if (/alfred|guardian/.test(lower)) {
+    router.push('/alfred')
+    return 'Opening Alfred Guardian'
+  }
+  if (/social|instagram|tiktok|youtube/.test(lower)) {
+    router.push('/social')
+    return 'Opening Social OS'
+  }
 
   return null
 }
@@ -125,7 +133,13 @@ export function CommandBar({ isDemoMode = false }: CommandBarProps) {
               exit={{ opacity: 0 }}
               className="flex items-center justify-between w-full"
             >
-              <span className="text-accent font-serif text-sm tracking-[0.2em] uppercase">Legacy OS</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  <ShieldCheck size={11} className="text-green-400/70" />
+                </div>
+                <span className="text-accent font-serif text-sm tracking-[0.2em] uppercase">Legacy OS</span>
+              </div>
               <div className="flex items-center gap-1">
                 {isDemoMode && (
                   <span className="text-[9px] uppercase tracking-widest border border-accent/40 text-accent/70 px-2 py-0.5 rounded mr-1">
