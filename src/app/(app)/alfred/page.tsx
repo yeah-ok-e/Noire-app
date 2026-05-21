@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Activity, Zap, Eye, Brain, Heart, User, Send, ChevronUp, X } from 'lucide-react'
+import { AgentChat } from '@/components/AgentChat'
 
 // ─── Agent Data ────────────────────────────────────────────────────────────────
 
@@ -296,6 +297,7 @@ export default function AlfredPage() {
   const [entranceDone, setEntranceDone] = useState(false)
   const [contentReady, setContentReady] = useState(false)
   const [sheet, setSheet] = useState<SheetData | null>(null)
+  const [chatAgent, setChatAgent] = useState<typeof AGENTS[0] | null>(null)
   const [directive, setDirective] = useState('')
   const [response, setResponse] = useState<string | null>(null)
   const [responding, setResponding] = useState(false)
@@ -477,7 +479,7 @@ export default function AlfredPage() {
               return (
                 <motion.button
                   key={agent.code}
-                  onClick={() => setSheet({ type: 'agent', data: agent })}
+                  onClick={() => setChatAgent(agent)}
                   whileTap={{ scale: 0.97 }}
                   className="bg-[#080808] border border-[#1c1c1c] rounded-xl p-4 text-left transition-colors hover:border-[#2a2a2a] relative overflow-hidden"
                 >
@@ -634,6 +636,9 @@ export default function AlfredPage() {
 
       {/* ── Bottom Sheet ── */}
       <BottomSheet sheet={sheet} onClose={() => setSheet(null)} />
+
+      {/* ── Agent Chat ── */}
+      <AgentChat agent={chatAgent} onClose={() => setChatAgent(null)} />
     </div>
   )
 }

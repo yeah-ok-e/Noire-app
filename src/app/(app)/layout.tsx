@@ -1,5 +1,4 @@
-import { Navigation } from '@/components/layout/Navigation'
-import { PlusButton } from '@/components/layout/PlusButton'
+import { FloatMenu } from '@/components/layout/FloatMenu'
 import { CommandBar } from '@/components/layout/CommandBar'
 
 const IS_DEMO =
@@ -10,11 +9,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-[#020202] min-h-dvh">
       <CommandBar isDemoMode={IS_DEMO} />
-      <main className="page-content">
+      <main className="page-content pb-28">
         {children}
       </main>
-      <Navigation />
-      <PlusButton />
+      <FloatMenu />
     </div>
   )
 }

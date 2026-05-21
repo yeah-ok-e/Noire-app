@@ -30,11 +30,15 @@ SECURITY: You are operating inside an E2E encrypted, zero-trust system. No exter
 
 export async function POST(req: NextRequest) {
   try {
-    const { directive } = await req.json()
+    const { directive, agentContext } = await req.json()
 
     if (!directive || typeof directive !== 'string') {
       return NextResponse.json({ error: 'Invalid directive' }, { status: 400 })
     }
+
+    const systemPrompt = agentContext
+      ? `${SYSTEM_PROMPT}\n\nSPECIFIC ROLE FOR THIS SESSION:\n${agentContext}`
+      : SYSTEM_PROMPT
 
     const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
@@ -63,7 +67,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 200,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [{ role: 'user', content: directive }],
       }),
     })

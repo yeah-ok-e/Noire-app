@@ -49,11 +49,11 @@ const LINKED_ACCOUNTS = [
     name: 'Fidelity Investments',
     category: 'Brokerage & Retirement',
     type: 'investment',
-    lastFour: '4821',
-    status: 'connected' as const,
-    lastSync: new Date(Date.now() - 3 * 3600000).toISOString(),
-    balance: '$12,440.00',
-    note: 'Roth IRA + brokerage account',
+    lastFour: null,
+    status: 'not_connected' as const,
+    lastSync: null,
+    balance: null,
+    note: 'Connect via Plaid — requires Plaid integration',
     color: '#2e7d32',
   },
   {
@@ -61,11 +61,11 @@ const LINKED_ACCOUNTS = [
     name: 'Chase Bank',
     category: 'Checking & Savings',
     type: 'bank',
-    lastFour: '7703',
-    status: 'connected' as const,
-    lastSync: new Date(Date.now() - 1 * 3600000).toISOString(),
-    balance: '$1,847.32',
-    note: 'Primary checking — direct deposit',
+    lastFour: null,
+    status: 'not_connected' as const,
+    lastSync: null,
+    balance: null,
+    note: 'Connect via Plaid — requires Plaid integration',
     color: '#1565c0',
   },
   {
@@ -74,10 +74,10 @@ const LINKED_ACCOUNTS = [
     category: 'Crypto Exchange',
     type: 'crypto',
     lastFour: null,
-    status: 'connected' as const,
-    lastSync: new Date(Date.now() - 6 * 3600000).toISOString(),
-    balance: '$340.17',
-    note: 'BTC, ETH holdings',
+    status: 'not_connected' as const,
+    lastSync: null,
+    balance: null,
+    note: 'Connect via API key — add in settings',
     color: '#1652f0',
   },
   {
@@ -86,10 +86,10 @@ const LINKED_ACCOUNTS = [
     category: 'Crypto Exchange',
     type: 'crypto',
     lastFour: null,
-    status: 'pending' as const,
+    status: 'not_connected' as const,
     lastSync: null,
     balance: null,
-    note: 'API key pending — add in settings',
+    note: 'Connect via API key — add in settings',
     color: '#5741d9',
   },
   {
@@ -98,19 +98,20 @@ const LINKED_ACCOUNTS = [
     category: 'P2P Payments',
     type: 'payments',
     lastFour: null,
-    status: 'connected' as const,
-    lastSync: new Date(Date.now() - 30 * 60000).toISOString(),
-    balance: '$215.00',
-    note: '$cashtag linked — Noire payments',
+    status: 'not_connected' as const,
+    lastSync: null,
+    balance: null,
+    note: 'Manual sync only — no live API available',
     color: '#00d632',
   },
 ]
 
 const FOOTPRINT_SCAN = {
-  lastScan: new Date(Date.now() - 2 * 3600000).toISOString(),
-  score: 72, // lower = better (less exposed)
+  lastScan: null,
+  score: null,
+  demo: true,
   exposures: [
-    { id: 'fp1', type: 'email', value: 'e***h@gmail.com', source: 'Data broker — Spokeo', risk: 'medium', suppressed: false },
+    { id: 'fp1', type: 'email', value: 'e***h@gmail.com', source: 'Spokeo', risk: 'medium', suppressed: false },
     { id: 'fp2', type: 'address', value: '******* St, Philadelphia PA', source: 'Whitepages', risk: 'high', suppressed: false },
     { id: 'fp3', type: 'phone', value: '+1 (215) ***-****', source: 'BeenVerified', risk: 'high', suppressed: true },
     { id: 'fp4', type: 'name+city', value: 'Eligah Lewis, Philadelphia', source: 'MyLife.com', risk: 'medium', suppressed: false },
@@ -443,6 +444,7 @@ export default function AdminPage() {
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <span className={clsx('text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider font-medium',
                       account.status === 'connected' ? 'bg-green-500/15 text-green-400' :
+                      account.status === 'not_connected' ? 'bg-[#1a1a1a] text-[#444]' :
                       account.status === 'pending' ? 'bg-yellow-500/15 text-yellow-400' :
                       'bg-crisis/15 text-crisis'
                     )}>{account.status}</span>
@@ -473,7 +475,7 @@ export default function AdminPage() {
                     )}
                   >
                     <RefreshCw size={10} className={syncingAccount === account.id ? 'animate-spin' : ''} />
-                    {account.status === 'connected' ? 'Sync' : 'Connect'}
+                    {account.status === 'connected' ? 'Sync' : account.status === 'not_connected' ? 'Set Up' : 'Connect'}
                   </button>
                 </div>
               </div>
