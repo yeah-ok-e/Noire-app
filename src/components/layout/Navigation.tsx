@@ -27,8 +27,20 @@ export function Navigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-4 left-3 right-3 z-40 bg-surface/70 backdrop-blur-2xl border border-border/40 rounded-2xl shadow-2xl shadow-black/60">
-      <div className="flex items-center justify-around px-1">
+    <nav
+      className="fixed z-50 rounded-2xl"
+      style={{
+        bottom: '16px',
+        left: '12px',
+        right: '12px',
+        background: 'rgba(8, 8, 8, 0.82)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset',
+      }}
+    >
+      <div className="flex items-center justify-around px-1 py-1">
         {navItems.map(({ label, href, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
@@ -36,16 +48,20 @@ export function Navigation() {
               key={href}
               href={href}
               className={clsx(
-                'flex flex-col items-center justify-center gap-1 flex-1 py-2 px-1',
-                'transition-colors duration-200 relative min-w-0',
-                isActive ? 'text-accent' : 'text-text-muted hover:text-text-secondary'
+                'flex flex-col items-center justify-center gap-0.5 flex-1 py-2 px-0.5 rounded-xl transition-all duration-200 relative min-w-0',
+                isActive
+                  ? 'text-[#d4af7a]'
+                  : 'text-[#555555] hover:text-[#888888]'
               )}
+              style={isActive ? { background: 'rgba(212,175,122,0.08)' } : {}}
             >
-              {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
-              )}
-              <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
-              <span className="text-[8px] uppercase tracking-wider font-medium leading-none">{label}</span>
+              <Icon size={17} strokeWidth={isActive ? 2 : 1.5} />
+              <span
+                className="uppercase font-medium leading-none tracking-wider"
+                style={{ fontSize: '7px' }}
+              >
+                {label}
+              </span>
             </Link>
           )
         })}
