@@ -10,20 +10,6 @@ const IS_DEMO =
   !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
 
-function CompassIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="48" cy="48" r="44" stroke="#d4af7a" strokeWidth="1" opacity="0.4" />
-      <polygon points="48,8 51,44 48,41 45,44" fill="#d4af7a" opacity="0.9" />
-      <polygon points="48,88 51,52 48,55 45,52" fill="#f0ede8" opacity="0.3" />
-      <polygon points="88,48 52,45 55,48 52,51" fill="#f0ede8" opacity="0.3" />
-      <polygon points="8,48 44,45 41,48 44,51" fill="#f0ede8" opacity="0.3" />
-      <circle cx="48" cy="48" r="3" fill="#d4af7a" opacity="0.8" />
-      <circle cx="48" cy="48" r="1.5" fill="#080808" />
-    </svg>
-  )
-}
-
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -41,13 +27,9 @@ export default function LoginPage() {
     }
     setIsLoading(true)
     setError(null)
-
     try {
       const supabase = createClient()
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
       if (authError) {
         setError(authError.message)
       } else {
@@ -61,65 +43,69 @@ export default function LoginPage() {
     }
   }
 
-  const handleDemoMode = () => {
-    router.push('/command')
-  }
-
   return (
-    <div className="fixed inset-0 bg-[#080808] flex flex-col items-center justify-center px-6">
-      {/* Ambient glow */}
+    <div className="fixed inset-0 bg-[#020202] flex flex-col items-center justify-center px-6">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-80 h-80 rounded-full bg-accent opacity-[0.03] blur-3xl" />
+        <div className="w-96 h-96 rounded-full bg-[#d4af7a] opacity-[0.025] blur-3xl" />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-sm relative"
       >
-        {/* Logo */}
+        {/* Wordmark */}
         <div className="flex flex-col items-center mb-10">
-          <CompassIcon />
+          {'LEGACY OS'.split('').map((char, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: char === ' ' ? 0 : 1 }}
+              transition={{ delay: 0.1 + i * 0.04, duration: 0.6 }}
+              style={{ display: 'inline' }}
+            />
+          ))}
           <h1
-            className="text-2xl font-light tracking-[0.3em] uppercase text-[#f0ede8] mt-4"
-            style={{ fontFamily: 'Georgia, serif' }}
+            className="text-[28px] font-light tracking-[0.45em] uppercase text-[#f0ede8]"
+            style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
           >
             LEGACY OS
           </h1>
-          <p className="text-[10px] text-[#444444] tracking-[0.2em] uppercase mt-1">
-            A Lewis Family Product
+          <div className="mt-3 h-px w-12 bg-[#d4af7a] opacity-60" />
+          <p className="text-[9px] text-[#3a3a3a] tracking-[0.35em] uppercase mt-3">
+            A Lewis Family System
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#111111] border border-[#222222] rounded-2xl p-6 shadow-2xl">
+        <div className="bg-[#0a0a0a] border border-[#1c1c1c] rounded-2xl p-6 shadow-2xl">
           {IS_DEMO && (
-            <div className="mb-4 px-3 py-2 bg-accent/10 border border-accent/20 rounded-lg">
-              <p className="text-accent text-xs text-center">
-                Demo Mode — Supabase not configured
+            <div className="mb-5 px-3 py-2.5 bg-[#d4af7a]/8 border border-[#d4af7a]/20 rounded-lg">
+              <p className="text-[#d4af7a] text-[11px] text-center tracking-wide">
+                Demo Mode · Connect Supabase to go live
               </p>
             </div>
           )}
 
           <form onSubmit={handleSignIn} className="flex flex-col gap-4">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#888888] mb-1.5">
+              <label className="block text-[10px] uppercase tracking-widest text-[#555] mb-1.5">
                 Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="family@lewis.com"
+                placeholder="eligah@lewis.family"
                 required={!IS_DEMO}
                 disabled={IS_DEMO}
-                className="w-full bg-[#1a1a1a] border border-[#222222] rounded-lg px-3 py-2.5 text-[#f0ede8] text-sm placeholder:text-[#444444] focus:border-accent/60 transition-colors disabled:opacity-50"
+                className="w-full bg-[#111] border border-[#1c1c1c] rounded-xl px-3 py-3 text-[#f0ede8] text-sm placeholder:text-[#333] focus:border-[#d4af7a]/40 outline-none transition-colors disabled:opacity-40"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#888888] mb-1.5">
+              <label className="block text-[10px] uppercase tracking-widest text-[#555] mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -127,15 +113,15 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   required={!IS_DEMO}
                   disabled={IS_DEMO}
-                  className="w-full bg-[#1a1a1a] border border-[#222222] rounded-lg px-3 py-2.5 pr-10 text-[#f0ede8] text-sm placeholder:text-[#444444] focus:border-accent/60 transition-colors disabled:opacity-50"
+                  className="w-full bg-[#111] border border-[#1c1c1c] rounded-xl px-3 py-3 pr-10 text-[#f0ede8] text-sm placeholder:text-[#333] focus:border-[#d4af7a]/40 outline-none transition-colors disabled:opacity-40"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444444] hover:text-[#888888] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#333] hover:text-[#666] transition-colors"
                 >
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
@@ -143,7 +129,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-crisis text-xs">
+              <div className="flex items-center gap-2 text-red-400 text-xs">
                 <AlertCircle size={12} />
                 <span>{error}</span>
               </div>
@@ -152,15 +138,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-lg border border-accent text-accent font-medium text-sm tracking-wider hover:bg-accent/10 transition-all duration-200 disabled:opacity-50 mt-1"
+              className="w-full py-3 rounded-xl border border-[#d4af7a] text-[#d4af7a] font-medium text-sm tracking-[0.15em] hover:bg-[#d4af7a]/8 transition-all duration-200 disabled:opacity-40 mt-1"
             >
-              {isLoading ? 'Authenticating...' : IS_DEMO ? 'Enter Demo Mode' : 'Sign In'}
+              {isLoading ? 'Authenticating...' : IS_DEMO ? 'Enter System' : 'Sign In'}
             </button>
-            <div className="flex items-center gap-3 mt-1">
-              <div className="flex-1 h-px bg-[#222222]" />
-              <span className="text-[10px] text-[#444444] uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px bg-[#222222]" />
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-[#1c1c1c]" />
+              <span className="text-[9px] text-[#333] uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-[#1c1c1c]" />
             </div>
+
             <button
               type="button"
               onClick={async () => {
@@ -170,18 +158,18 @@ export default function LoginPage() {
                 router.push('/command')
               }}
               disabled={biometricLoading}
-              className="w-full py-3 rounded-lg border border-[#333333] text-[#888888] text-sm tracking-wider hover:border-[#555555] hover:text-[#aaaaaa] transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl border border-[#222] text-[#555] text-sm tracking-wider hover:border-[#333] hover:text-[#888] transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2"
             >
-              <Fingerprint size={16} />
+              <Fingerprint size={15} />
               {biometricLoading ? 'Authenticating...' : 'Face ID / Touch ID'}
             </button>
           </form>
 
           {!IS_DEMO && (
-            <div className="mt-4 pt-4 border-t border-[#222222]">
+            <div className="mt-5 pt-4 border-t border-[#1c1c1c]">
               <button
-                onClick={handleDemoMode}
-                className="w-full text-[#444444] text-xs hover:text-[#888888] transition-colors"
+                onClick={() => router.push('/command')}
+                className="w-full text-[#333] text-[11px] hover:text-[#555] transition-colors"
               >
                 Continue in demo mode
               </button>
@@ -189,8 +177,8 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-[#333333] text-[10px] mt-6 tracking-widest">
-          PRIVATE FAMILY SYSTEM
+        <p className="text-center text-[#222] text-[9px] mt-6 tracking-[0.3em] uppercase">
+          Private · Encrypted · Family Only
         </p>
       </motion.div>
     </div>

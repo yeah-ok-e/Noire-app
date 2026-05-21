@@ -241,13 +241,17 @@ export default function AdminPage() {
         <p className="text-xs text-accent font-medium">Demo Mode Active</p>
         <p className="text-[10px] text-text-muted mt-0.5">Connect Supabase to enable live sync, persistent data, and full audit logging.</p>
       </div>
-      <a href="/privacy" className="flex items-center justify-between px-4 py-3 bg-surface border border-border rounded-lg hover:border-accent/40 transition-colors group">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <p className="text-xs text-text-secondary group-hover:text-accent transition-colors">Trust Architecture & Security</p>
-        </div>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted group-hover:text-accent"/></svg>
-      </a>
+      <div className="grid grid-cols-2 gap-2">
+        <a href="/setup" className="flex items-center justify-between px-3 py-3 bg-surface border border-accent/30 rounded-lg hover:border-accent/60 transition-colors group">
+          <p className="text-xs text-accent group-hover:text-accent transition-colors">Connect Database →</p>
+        </a>
+        <a href="/privacy" className="flex items-center justify-between px-3 py-3 bg-surface border border-border rounded-lg hover:border-accent/40 transition-colors group">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <p className="text-xs text-text-secondary group-hover:text-accent transition-colors">Trust Architecture</p>
+          </div>
+        </a>
+      </div>
 
       {/* System Status */}
       <div className="grid grid-cols-2 gap-2">
