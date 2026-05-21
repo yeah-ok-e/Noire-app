@@ -317,17 +317,28 @@ export default function AlfredPage() {
     }
   }, [])
 
-  function handleDirective() {
+  async function handleDirective() {
     if (!directive.trim() || responding) return
+    const text = directive.trim()
     setResponding(true)
     setResponse(null)
-    const idx = responseIndexRef.current % ALFRED_RESPONSES.length
-    responseIndexRef.current += 1
-    setTimeout(() => {
+    setDirective('')
+    try {
+      const res = await fetch('/api/alfred', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ directive: text }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setResponse(data.response)
+    } catch {
+      const idx = responseIndexRef.current % ALFRED_RESPONSES.length
+      responseIndexRef.current += 1
       setResponse(ALFRED_RESPONSES[idx])
+    } finally {
       setResponding(false)
-      setDirective('')
-    }, 800)
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
